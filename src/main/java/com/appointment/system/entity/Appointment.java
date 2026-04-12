@@ -2,7 +2,6 @@ package com.appointment.system.entity;
 
 import com.appointment.system.enums.AppointmentStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -76,20 +75,6 @@ public class Appointment {
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<AppointmentChange> changes = new ArrayList<>();
-
-    public Appointment(Client client, Provider provider, ProviderServiceOffering providerServiceOffering,
-                       LocalDateTime startTime, LocalDateTime endTime,
-                       int durationAtBooking, String priceAtBooking, String serviceTitleSnapshot) {
-        this.client = client;
-        this.provider = provider;
-        this.providerServiceOffering = providerServiceOffering;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.status = AppointmentStatus.REQUESTED;
-        this.durationAtBooking = durationAtBooking;
-        this.priceAtBooking = priceAtBooking;
-        this.serviceTitleSnapshot = serviceTitleSnapshot;
-    }
 
     @PrePersist
     protected void onCreate() {

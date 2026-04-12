@@ -21,13 +21,13 @@ public class Person {
 
     @NotNull
     @Size(min = 3, max = 30)
-    @Pattern(regexp = "[A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ ]+([A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ ]+)*")
+    @Pattern(regexp = "^[A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ]+([ -][A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ]+)*$")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @NotNull
     @Size(min = 3, max = 30)
-    @Pattern(regexp = "[A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ ]+([A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ ]+)*")
+    @Pattern(regexp = "^[A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ]+([ -][A-ZĒŪĪĻĶĢŠĀČŅŽ][a-zēūīļķģšāžčņ]+)*$")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
