@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>My Dashboard</title></head>
+<body>
+<div layout:fragment="content">
+    <h2 class="mb-4">Welcome back, <span th:text="${username}"></span></h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-calendar-check me-2"></i>My appointments
+                    </h5>
+                    <p class="card-text text-muted">View and manage your upcoming appointments</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">View all</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-search me-2"></i>Book appointment
+                    </h5>
+                    <p class="card-text text-muted">Find a provider and book a new appointment</p>
+                    <a th:href="@{/providers}" class="btn btn-outline-primary btn-sm">Browse providers</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-person me-2"></i>My profile
+                    </h5>
+                    <p class="card-text text-muted">Update your contact details</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Edit profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Provider Dashboard</title></head>
+<body>
+<div layout:fragment="content">
+    <h2 class="mb-4">Welcome back, <span th:text="${username}"></span></h2>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-calendar-week me-2"></i>Appointments
+                    </h5>
+                    <p class="card-text text-muted">Manage incoming and upcoming bookings</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">View all</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-scissors me-2"></i>My services
+                    </h5>
+                    <p class="card-text text-muted">Add and manage the services you offer</p>
+                    <a th:href="@{/provider/services}" class="btn btn-outline-primary btn-sm">Manage services</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-clock me-2"></i>Availability
+                    </h5>
+                    <p class="card-text text-muted">Set your working hours and time off</p>
+                    <a th:href="@{/provider/availability}" class="btn btn-outline-primary btn-sm">Set availability</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-person-badge me-2"></i>My profile
+                    </h5>
+                    <p class="card-text text-muted">Update your bio, location and portfolio</p>
+                    <a th:href="@{/provider/profile}" class="btn btn-outline-primary btn-sm">Edit profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
