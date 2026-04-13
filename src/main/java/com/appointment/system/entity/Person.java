@@ -31,7 +31,7 @@ public class Person {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Pattern(regexp = "^\\+?\\d{7,15}$")
+    @Pattern(regexp = "^\\+?[\\d\\s\\-]{7,20}$", message = "Please enter a valid phone number (e.g. +371 22233233)")
     @Column(name = "phone_nr")
     private String phoneNr;
 
