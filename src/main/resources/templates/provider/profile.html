@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>My Profile</title></head>
+<body>
+<div layout:fragment="content">
+  <div class="row">
+
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body text-center py-4">
+          <div class="bg-secondary rounded-circle d-inline-flex align-items-center
+                                justify-content-center mb-3"
+               style="width:80px;height:80px;">
+            <i class="bi bi-person-fill text-white fs-2"></i>
+          </div>
+          <h5 class="mb-0"
+              th:text="${profile.firstName + ' ' + profile.lastName}"></h5>
+          <small class="text-muted" th:text="${profile.location ?: 'No location set'}"></small>
+          <div class="mt-2">
+            <span class="badge bg-success" th:if="${profile.isActive}">Active</span>
+            <span class="badge bg-secondary" th:unless="${profile.isActive}">Inactive</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Edit profile</h5>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/provider/profile}"
+                th:object="${updateRequest}" method="post">
+
+            <div class="row mb-3">
+              <div class="col">
+                <label class="form-label">First name</label>
+                <input type="text" th:field="*{firstName}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"/>
+                <div class="invalid-feedback" th:errors="*{firstName}"></div>
+              </div>
+              <div class="col">
+                <label class="form-label">Last name</label>
+                <input type="text" th:field="*{lastName}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"/>
+                <div class="invalid-feedback" th:errors="*{lastName}"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Phone number</label>
+              <input type="text" th:field="*{phoneNr}"
+                     class="form-control"
+                     th:classappend="${#fields.hasErrors('phoneNr')} ? 'is-invalid'"/>
+              <div class="invalid-feedback" th:errors="*{phoneNr}"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Location</label>
+              <input type="text" th:field="*{location}"
+                     class="form-control" placeholder="e.g. Riga, Latvia"/>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Bio</label>
+              <textarea th:field="*{bio}"
+                        class="form-control" rows="4"
+                        placeholder="Tell clients about yourself..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a th:href="@{/provider/dashboard}"
+               class="btn btn-outline-secondary ms-2">Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
