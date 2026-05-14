@@ -7,118 +7,147 @@
 <body>
 <div layout:fragment="content">
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">My services</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
-      <i class="bi bi-plus-lg me-1"></i>Add service
-    </button>
-  </div>
-
-  <div th:if="${#lists.isEmpty(services)}" class="text-center text-muted py-5">
-    <i class="bi bi-scissors fs-1 d-block mb-3"></i>
-    <p>You haven't added any services yet.</p>
-  </div>
-
-  <div class="row g-3" th:unless="${#lists.isEmpty(services)}">
-    <div class="col-md-6" th:each="service : ${services}">
-      <div class="card h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h5 class="card-title mb-1" th:text="${service.title}"></h5>
-              <span class="badge bg-secondary mb-2"
-                    th:text="${service.category}"></span>
-            </div>
-            <form th:action="@{/provider/services/deactivate/{id}(id=${service.id})}"
-                  method="post" class="d-inline">
-              <button type="submit" class="btn btn-sm btn-outline-danger"
-                      onclick="return confirm('Remove this service?')">
-                <i class="bi bi-trash"></i>
-              </button>
-            </form>
-          </div>
-          <p class="card-text text-muted small"
-             th:text="${service.description ?: 'No description'}"></p>
-          <div class="d-flex gap-3 mt-2">
-            <small class="text-muted">
-              <i class="bi bi-clock me-1"></i>
-              <span th:text="${service.effectiveDuration + ' min'}"></span>
-            </small>
-            <small class="text-muted" th:if="${service.effectivePrice != null}">
-              <i class="bi bi-tag me-1"></i>
-              <span th:text="${service.effectivePrice}"></span>
-            </small>
-          </div>
-        </div>
-      </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">My services</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+            <i class="bi bi-plus-lg me-1"></i>Add service
+        </button>
     </div>
-  </div>
 
-  <!-- Add service modal -->
-  <div class="modal fade" id="addServiceModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Add new service</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <form th:action="@{/provider/services/create}"
-              th:object="${createRequest}" method="post">
-          <div class="modal-body">
-
-            <div class="mb-3">
-              <label class="form-label">Title</label>
-              <input type="text" th:field="*{title}" class="form-control"
-                     th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
-                     placeholder="e.g. Haircut"/>
-              <div class="invalid-feedback" th:errors="*{title}"></div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Category</label>
-              <select th:field="*{category}" class="form-select"
-                      th:classappend="${#fields.hasErrors('category')} ? 'is-invalid'">
-                <option value="">Select category</option>
-                <option th:each="cat : ${categories}"
-                        th:value="${cat}"
-                        th:text="${cat}"></option>
-              </select>
-              <div class="invalid-feedback" th:errors="*{category}"></div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Description</label>
-              <textarea th:field="*{description}" class="form-control"
-                        rows="3" placeholder="Describe this service..."></textarea>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col">
-                <label class="form-label">Duration (minutes)</label>
-                <input type="number" th:field="*{defaultDuration}"
-                       class="form-control"
-                       th:classappend="${#fields.hasErrors('defaultDuration')} ? 'is-invalid'"
-                       placeholder="60"/>
-                <div class="invalid-feedback" th:errors="*{defaultDuration}"></div>
-              </div>
-              <div class="col">
-                <label class="form-label">Price estimate</label>
-                <input type="text" th:field="*{priceEstimate}"
-                       class="form-control"
-                       placeholder="e.g. 50-80€"/>
-              </div>
-            </div>
-
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Add service</button>
-          </div>
-        </form>
-      </div>
+    <div th:if="${#lists.isEmpty(services)}" class="text-center text-muted py-5">
+        <i class="bi bi-scissors fs-1 d-block mb-3"></i>
+        <p>You haven't added any services yet.</p>
     </div>
-  </div>
+
+    <div class="row g-3" th:unless="${#lists.isEmpty(services)}">
+        <div class="col-md-6" th:each="service : ${services}">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title mb-1" th:text="${service.title}"></h5>
+                            <span class="badge bg-secondary mb-2"
+                                  th:text="${service.category}"></span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/provider/services/edit/{id}(id=${service.id})}"
+                               class="btn btn-sm btn-outline-secondary"
+                               aria-label="Edit service">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/provider/services/deactivate/{id}(id=${service.id})}"
+                                  method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Remove this service?')"
+                                        aria-label="Remove service">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted small"
+                       th:text="${service.description ?: 'No description'}"></p>
+                    <div class="d-flex gap-3 mt-2">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            <span th:text="${service.effectiveDuration + ' min'}"></span>
+                        </small>
+                        <small class="text-muted" th:if="${service.effectivePrice != null}">
+                            <i class="bi bi-tag me-1"></i>
+                            <span th:text="${service.effectivePrice}"></span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addServiceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add new service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/provider/services/create}"
+                      th:object="${createRequest}" method="post">
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" th:field="*{title}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                                   placeholder="e.g. Haircut"/>
+                            <div class="invalid-feedback" th:errors="*{title}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select th:field="*{category}" class="form-select"
+                                    th:classappend="${#fields.hasErrors('category')} ? 'is-invalid'">
+                                <option value="">Select category</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat}"
+                                        th:text="${cat}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{category}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Booking type</label>
+                            <select th:field="*{bookingType}" class="form-select">
+                                <option value="SLOT_BASED">Slot based — client picks a time</option>
+                                <option value="REQUEST_ONLY">Request only — provider contacts client</option>
+                            </select>
+                            <div class="form-text">
+                                Use "Request only" for any service where you need to discuss details before booking.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea th:field="*{description}" class="form-control"
+                                      rows="3" placeholder="Describe this service..."></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label">Duration (minutes)</label>
+                                <input type="number" th:field="*{defaultDuration}"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('defaultDuration')} ? 'is-invalid'"
+                                       placeholder="60"/>
+                                <div class="invalid-feedback" th:errors="*{defaultDuration}"></div>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">
+                                    Buffer time (minutes)
+                                    <small class="text-muted">— prep/cleanup after</small>
+                                </label>
+                                <input type="number" th:field="*{bufferMinutes}"
+                                       class="form-control"
+                                       placeholder="0"/>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Price estimate</label>
+                                <input type="text" th:field="*{priceEstimate}"
+                                       class="form-control"
+                                       placeholder="e.g. 50-80€"/>
+                                <div class="form-text">You can type € directly or write EUR</div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">Add service</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 </div>
 </body>

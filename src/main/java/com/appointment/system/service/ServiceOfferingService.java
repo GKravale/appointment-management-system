@@ -5,12 +5,14 @@ import com.appointment.system.dto.response.ProviderServiceOfferingResponse;
 import com.appointment.system.entity.Provider;
 import com.appointment.system.entity.ProviderServiceOffering;
 import com.appointment.system.entity.ServiceOffering;
+import com.appointment.system.enums.BookingType;
 import com.appointment.system.enums.ServiceCategory;
 import com.appointment.system.repository.ProviderRepository;
 import com.appointment.system.repository.ProviderServiceOfferingRepository;
 import com.appointment.system.repository.ServiceOfferingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ServiceOfferingService {
 
     private final ServiceOfferingRepository serviceOfferingRepository;
@@ -30,7 +33,7 @@ public class ServiceOfferingService {
         return providerServiceOfferingRepository
                 .findByProviderAndIsActiveTrueAndIsDeletedFalse(provider)
                 .stream()
-                .map(this::toResponse)
+                .map(ProviderServiceOfferingResponse::from)
                 .toList();
     }
 
@@ -54,10 +57,29 @@ public class ServiceOfferingService {
                 request.getPriceEstimate(),
                 request.getCategory()
         );
+        offering.setBookingType(request.getBookingType() != null ? request.getBookingType() : BookingType.SLOT_BASED);
         serviceOfferingRepository.save(offering);
 
         ProviderServiceOffering providerOffering = new ProviderServiceOffering(provider, offering);
+        providerOffering.setBufferMinutes(request.getBufferMinutes());
         providerServiceOfferingRepository.save(providerOffering);
+    }
+
+    @Transactional
+    public void update(Long providerServiceOfferingId, Long personId, CreateServiceOfferingRequest request) {
+        ProviderServiceOffering offering = providerServiceOfferingRepository.findById(providerServiceOfferingId)
+                        .orElseThrow(() -> new EntityNotFoundException("Service not found"));
+        if (!offering.getProvider().getId().equals(personId)) {
+            throw new SecurityException("Not authorized");
+        }
+        offering.getServiceOffering().setTitle(request.getTitle());
+        offering.getServiceOffering().setDescription(request.getDescription());
+        offering.getServiceOffering().setDefaultDuration(request.getDefaultDuration());
+        offering.getServiceOffering().setPriceEstimate(request.getPriceEstimate());
+        offering.getServiceOffering().setCategory(request.getCategory());
+        offering.getServiceOffering().setBookingType(request.getBookingType() != null ? request.getBookingType() :
+                BookingType.SLOT_BASED);
+        offering.setBufferMinutes(request.getBufferMinutes());
     }
 
     @Transactional
@@ -71,22 +93,5 @@ public class ServiceOfferingService {
         }
 
         offering.setIsActive(false);
-    }
-
-    private ProviderServiceOfferingResponse toResponse(ProviderServiceOffering providerServiceOffering) {
-        ProviderServiceOfferingResponse response = new ProviderServiceOfferingResponse();
-        response.setId(providerServiceOffering.getId());
-        response.setServiceOfferingId(providerServiceOffering.getServiceOffering().getId());
-        response.setTitle(providerServiceOffering.getServiceOffering().getTitle());
-        response.setDescription(providerServiceOffering.getServiceOffering().getDescription());
-        response.setCategory(providerServiceOffering.getServiceOffering().getCategory());
-        response.setEffectiveDuration(providerServiceOffering.getDurationOverride() != null ?
-                providerServiceOffering.getDurationOverride() :
-                providerServiceOffering.getServiceOffering().getDefaultDuration());
-        response.setEffectivePrice(providerServiceOffering.getPriceOverride() != null ?
-                providerServiceOffering.getPriceOverride() :
-                providerServiceOffering.getServiceOffering().getPriceEstimate());
-        response.setIsActive(providerServiceOffering.getIsActive());
-        return response;
     }
 }

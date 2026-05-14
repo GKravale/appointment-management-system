@@ -1,5 +1,6 @@
 package com.appointment.system.entity;
 
+import com.appointment.system.enums.BookingType;
 import com.appointment.system.enums.ServiceCategory;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -47,6 +48,10 @@ public class ServiceOffering {
     @OneToMany(mappedBy = "serviceOffering", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ProviderServiceOffering> providerServiceOfferings = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "booking_type", nullable = false)
+    private BookingType bookingType = BookingType.SLOT_BASED;
 
     public ServiceOffering(String title, String description, int defaultDuration, String priceEstimate,
                            ServiceCategory category) {

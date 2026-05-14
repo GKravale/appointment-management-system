@@ -40,6 +40,9 @@ public class ProviderServiceOffering {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
+    @Column(name = "buffer_minutes")
+    private Integer bufferMinutes = 0;
+
     @OneToMany(mappedBy = "providerServiceOffering", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Appointment> appointments = new ArrayList<>();
@@ -47,5 +50,9 @@ public class ProviderServiceOffering {
     public ProviderServiceOffering(Provider provider, ServiceOffering serviceOffering) {
         this.provider = provider;
         this.serviceOffering = serviceOffering;
+    }
+
+    public String getEffectivePrice() {
+        return priceOverride != null ? priceOverride : serviceOffering.getPriceEstimate();
     }
 }
