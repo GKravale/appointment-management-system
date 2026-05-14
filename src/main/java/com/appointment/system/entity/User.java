@@ -1,5 +1,6 @@
 package com.appointment.system.entity;
 
+import com.appointment.system.enums.AccountStatus;
 import com.appointment.system.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -35,6 +36,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false)
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
     @OneToOne
     @JoinColumn(name = "person_id", nullable = false, unique = true)

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Admin Dashboard</title></head>
+<body>
+<div layout:fragment="content">
+
+    <h2 class="mb-4">Admin dashboard</h2>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold"
+                         th:text="${totalUsers}"></div>
+                    <div class="text-muted small">Total users</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold text-primary"
+                         th:text="${totalProviders}"></div>
+                    <div class="text-muted small">Providers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold text-success"
+                         th:text="${totalClients}"></div>
+                    <div class="text-muted small">Clients</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="fs-2 fw-bold text-info"
+                         th:text="${totalAppointments}"></div>
+                    <div class="text-muted small">Appointments</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Pending provider approvals</h6>
+            <a th:href="@{/admin/providers}"
+               class="btn btn-sm btn-outline-primary">View all providers</a>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${#lists.isEmpty(pendingProviders)}"
+                 class="text-muted text-center py-3">
+                No pending approvals.
+            </div>
+            <div th:each="user : ${pendingProviders}"
+                 class="d-flex justify-content-between align-items-center
+                        px-3 py-2 border-bottom">
+                <div>
+                    <span class="fw-semibold"
+                          th:text="${user.person.firstName + ' ' +
+                                    user.person.lastName}"></span>
+                    <span class="text-muted small ms-2"
+                          th:text="${user.email}"></span>
+                </div>
+                <div class="d-flex gap-2">
+                    <form th:action="@{/admin/providers/{id}/approve(id=${user.id})}"
+                          method="post">
+                        <button class="btn btn-success btn-sm">Approve</button>
+                    </form>
+                    <form th:action="@{/admin/providers/{id}/suspend(id=${user.id})}"
+                          method="post">
+                        <button class="btn btn-outline-danger btn-sm">Reject</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a th:href="@{/admin/providers}" class="card text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-person-badge fs-2 d-block mb-2"></i>
+                    <div class="fw-semibold">Manage providers</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/users}" class="card text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-people fs-2 d-block mb-2"></i>
+                    <div class="fw-semibold">Manage users</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/admin/appointments}" class="card text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-calendar-week fs-2 d-block mb-2"></i>
+                    <div class="fw-semibold">All appointments</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.appointment.system.security;
 
 import com.appointment.system.entity.User;
+import com.appointment.system.enums.AccountStatus;
 import com.appointment.system.enums.Role;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +20,7 @@ public class CustomUserDetails implements UserDetails {
     private final String email;
     private final Role role;
     private final Long personId;
+    private final AccountStatus accountStatus;
 
     public CustomUserDetails(User user) {
         this.id = user.getId();
@@ -27,6 +29,7 @@ public class CustomUserDetails implements UserDetails {
         this.email = user.getEmail();
         this.role = user.getRole();
         this.personId = user.getPerson().getId();
+        this.accountStatus = user.getAccountStatus();
     }
 
     @Override
@@ -51,6 +54,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return accountStatus == null || accountStatus == AccountStatus.ACTIVE;
     }
 }
