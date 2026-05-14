@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/base}">
+<head><title>Provider Profile</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="row">
+
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center py-4">
+                    <div class="bg-secondary rounded-circle d-inline-flex align-items-center
+                                justify-content-center mb-3"
+                         style="width:80px;height:80px;">
+                        <i class="bi bi-person-fill text-white fs-2"></i>
+                    </div>
+                    <h4 class="mb-1"
+                        th:text="${provider.firstName + ' ' + provider.lastName}"></h4>
+                    <p class="text-muted mb-2"
+                       th:text="${provider.location ?: 'Location not set'}">
+                    </p>
+                    <span class="badge bg-success" th:if="${provider.isActive}">
+                        Active
+                    </span>
+                </div>
+            </div>
+
+            <div class="card mt-3" th:if="${provider.bio != null}">
+                <div class="card-body">
+                    <h6 class="card-title">About</h6>
+                    <p class="card-text text-muted small"
+                       th:text="${provider.bio}"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h5 class="mb-3">Services offered</h5>
+            <div th:if="${#lists.isEmpty(provider.serviceOfferings)}"
+                 class="text-muted">
+                <p>This provider hasn't added any services yet.</p>
+            </div>
+
+            <div class="row g-3" th:unless="${#lists.isEmpty(provider.serviceOfferings)}">
+                <div class="col-12"
+                     th:each="service : ${provider.serviceOfferings}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1" th:text="${service.title}"></h6>
+                                    <span class="badge bg-secondary me-2"
+                                          th:text="${service.category}"></span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        <span th:text="${service.effectiveDuration + ' min'}"></span>
+                                    </small>
+                                    <small class="text-muted ms-2"
+                                           th:if="${service.effectivePrice != null}">
+                                        <i class="bi bi-tag me-1"></i>
+                                        <span th:text="${service.effectivePrice}"></span>
+                                    </small>
+                                </div>
+
+                                <a th:if="${service.bookingType == null or service.bookingType.name() == 'SLOT_BASED'}"
+                                   sec:authorize="hasAuthority('ROLE_CLIENT')"
+                                   th:href="@{/client/book(providerId=${provider.id},serviceId=${service.id})}"
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-calendar-plus me-1"></i>Book
+                                </a>
+
+                                <a th:if="${service.bookingType != null and service.bookingType.name() == 'REQUEST_ONLY'}"
+                                   sec:authorize="hasAuthority('ROLE_CLIENT')"
+                                   th:href="@{/client/request(providerId=${provider.id},serviceId=${service.id})}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-chat-dots me-1"></i>Request consultation
+                                </a>
+
+                                <a sec:authorize="isAnonymous()"
+                                   th:href="@{/auth/login}"
+                                   class="btn btn-outline-secondary btn-sm">
+                                    Log in to book
+                                </a>
+
+                            </div>
+                            <p class="card-text text-muted small mt-2 mb-0"
+                               th:if="${service.description != null}"
+                               th:text="${service.description}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
