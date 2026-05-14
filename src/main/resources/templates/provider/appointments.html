@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Appointments</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Appointments</h2>
+        <a th:href="@{/provider/schedule}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-calendar3 me-1"></i>Calendar view
+        </a>
+    </div>
+
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab"
+                    data-bs-target="#requested" role="tab"
+                    aria-controls="requested" aria-selected="true">
+                Pending
+                <span class="badge bg-warning text-dark ms-1"
+                      th:text="${#lists.size(appointments.?[status.name() == 'REQUESTED'])}">
+                </span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab"
+                    data-bs-target="#confirmed" role="tab"
+                    aria-controls="confirmed" aria-selected="false">
+                Confirmed
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab"
+                    data-bs-target="#past" role="tab"
+                    aria-controls="past" aria-selected="false">
+                Past
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="requested" role="tabpanel">
+            <div th:each="apt : ${appointments}"
+                 th:if="${apt.status.name() == 'REQUESTED'}"
+                 class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1"
+                                th:text="${apt.clientFirstName + ' ' + apt.clientLastName}"></h6>
+                            <p class="text-muted small mb-1"
+                               th:text="${apt.serviceTitleSnapshot}"></p>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${#temporals.format(apt.startTime,
+                                               'EEE dd MMM yyyy HH:mm')}"></span>
+                                <span class="ms-2" th:text="${apt.durationAtBooking + ' min'}"></span>
+                            </p>
+                            <p class="text-muted small mt-1"
+                               th:if="${apt.clientNotes != null and !apt.clientNotes.isEmpty()}">
+                                <i class="bi bi-chat-left-text me-1"></i>
+                                <span th:text="${apt.clientNotes}"></span>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <form th:action="@{/provider/appointments/{id}/confirm(id=${apt.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-success btn-sm"
+                                        aria-label="Confirm appointment">
+                                    <i class="bi bi-check-lg me-1"></i>Confirm
+                                </button>
+                            </form>
+                            <form th:action="@{/provider/appointments/{id}/decline(id=${apt.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                        aria-label="Decline appointment"
+                                        onclick="return confirm('Decline this appointment?')">
+                                    <i class="bi bi-x-lg me-1"></i>Decline
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-muted"
+               th:if="${#lists.isEmpty(appointments.?[status.name() == 'REQUESTED'])}">
+                No pending requests.
+            </p>
+        </div>
+
+        <div class="tab-pane fade" id="confirmed" role="tabpanel">
+            <div th:each="apt : ${appointments}"
+                 th:if="${apt.status.name() == 'CONFIRMED'}"
+                 class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1"
+                                th:text="${apt.clientFirstName + ' ' + apt.clientLastName}"></h6>
+                            <p class="text-muted small mb-0"
+                               th:text="${apt.serviceTitleSnapshot}"></p>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${#temporals.format(apt.startTime,
+                           'EEE dd MMM yyyy HH:mm')}"></span>
+                            </p>
+                            <p class="text-muted small mb-0"
+                               th:if="${apt.clientNotes != null and !apt.clientNotes.isEmpty()}">
+                                <i class="bi bi-chat-left-text me-1"></i>
+                                <span th:text="${apt.clientNotes}"></span>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="badge bg-success">Confirmed</span>
+                            <form th:action="@{/provider/appointments/{id}/complete(id=${apt.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-success"
+                                        aria-label="Mark as completed">
+                                    <i class="bi bi-check-circle me-1"></i>Complete
+                                </button>
+                            </form>
+                            <form th:action="@{/provider/appointments/{id}/noshow(id=${apt.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                        aria-label="Mark as no show"
+                                        onclick="return confirm('Mark as no show?')">
+                                    No show
+                                </button>
+                            </form>
+                            <form th:action="@{/provider/appointments/{id}/cancel(id=${apt.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Cancel this appointment? Client will be notified.')"
+                                        aria-label="Cancel appointment">
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-muted"
+               th:if="${#lists.isEmpty(appointments.?[status.name() == 'CONFIRMED'])}">
+                No confirmed appointments.
+            </p>
+        </div>
+
+        <div class="tab-pane fade" id="past" role="tabpanel">
+            <div th:each="apt : ${appointments}"
+                 th:if="${apt.status.name() == 'COMPLETED' or apt.status.name() == 'CANCELLED'
+                          or apt.status.name() == 'DECLINED' or apt.status.name() == 'NO_SHOW'}"
+                 class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"
+                                th:text="${apt.clientFirstName + ' ' + apt.clientLastName}"></h6>
+                            <p class="text-muted small mb-0"
+                               th:text="${apt.serviceTitleSnapshot}"></p>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${#temporals.format(apt.startTime,
+                                               'EEE dd MMM yyyy HH:mm')}"></span>
+                            </p>
+                        </div>
+                        <span class="badge bg-secondary"
+                              th:text="${apt.status}"></span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-muted"
+               th:if="${#lists.isEmpty(appointments.?[status.name() == 'COMPLETED'
+                        or status.name() == 'CANCELLED' or status.name() == 'DECLINED'
+                        or status.name() == 'NO_SHOW'])}"
+               No past appointments.
+            </p>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
