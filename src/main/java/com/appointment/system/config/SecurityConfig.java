@@ -43,9 +43,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authenticationProvider(authenticationProvider()).authorizeHttpRequests(auth -> auth.requestMatchers("/",
                 "/auth/login", "/auth/register", "/providers", "/providers/{id}", "/css/**", "/js/**", "/uploads/**",
-                "/webjars/**").permitAll().requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN").requestMatchers(
+                "/webjars/**", "/client/slots/debug", "/auth/forgot-password",
+                "/auth/reset-password").permitAll().requestMatchers("/admin/**").hasAuthority(
+                        "ROLE_ADMIN").requestMatchers(
                 "/provider/**").hasAuthority("ROLE_PROVIDER").requestMatchers("/client/**").hasAuthority(
-                "ROLE_CLIENT").anyRequest().authenticated()).formLogin(form -> form.loginPage("/auth" + "/login").usernameParameter("username").passwordParameter("password").successHandler(roleBasedSuccessHandler()).failureUrl("/auth/login?error=true").permitAll()).logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/auth/login?logout=true").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll()).sessionManagement(session -> session.maximumSessions(1));
+                "ROLE_CLIENT").anyRequest().authenticated()).formLogin(form ->
+                form.loginPage("/auth" + "/login").usernameParameter("username").passwordParameter("password")
+                        .successHandler(roleBasedSuccessHandler()).failureUrl("/auth" + "/login?error=true")
+                        .permitAll()).logout(logout -> logout.logoutUrl("/auth/logout")
+                .logoutSuccessUrl("/auth/login?logout=true").invalidateHttpSession(true).deleteCookies("JSESSIONID")
+                .permitAll()).sessionManagement(session -> session.maximumSessions(1));
 
         return http.build();
     }
