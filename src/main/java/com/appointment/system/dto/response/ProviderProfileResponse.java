@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,4 +17,6 @@ public class ProviderProfileResponse {
     private String location;
     private String bio;
     private Boolean isActive;
+    private Integer cancellationHoursLimit;
+    private List<ProviderServiceOfferingResponse> serviceOfferings;
 }

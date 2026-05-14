@@ -25,4 +25,6 @@ public class UpdateProviderProfileRequest {
     private String location;
 
     private String bio;
+
+    private Integer cancellationHoursLimit = 24;
 }

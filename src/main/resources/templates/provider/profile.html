@@ -74,9 +74,23 @@
                         placeholder="Tell clients about yourself..."></textarea>
             </div>
 
+            <div class="mb-3">
+              <label class="form-label">Cancellation notice (hours)</label>
+              <input type="number" th:field="*{cancellationHoursLimit}"
+                     class="form-control" min="0" max="168"/>
+              <div class="form-text">
+                Minimum hours before appointment that clients can cancel.
+                Set to 0 to allow cancellation at any time.
+              </div>
+            </div>
+
             <button type="submit" class="btn btn-primary">Save changes</button>
             <a th:href="@{/provider/dashboard}"
                class="btn btn-outline-secondary ms-2">Cancel</a>
+            <a th:href="@{/auth/change-password}"
+               class="btn btn-outline-secondary ms-2">
+              Change password
+            </a>
           </form>
         </div>
       </div>

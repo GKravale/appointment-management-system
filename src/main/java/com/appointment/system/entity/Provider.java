@@ -26,6 +26,9 @@ public class Provider extends Person {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    @Column(name = "cancellation_hours_limit")
+    private Integer cancellationHoursLimit = 24;
+
     @OneToOne(mappedBy = "provider", cascade = CascadeType.ALL)
     @ToString.Exclude
     private Portfolio portfolio;

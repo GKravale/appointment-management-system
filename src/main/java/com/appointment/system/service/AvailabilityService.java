@@ -8,6 +8,7 @@ import com.appointment.system.repository.AvailabilityRepository;
 import com.appointment.system.repository.ProviderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
@@ -39,6 +41,11 @@ public class AvailabilityService {
 
         Provider provider = providerRepository.findById(personId)
                 .orElseThrow(() -> new EntityNotFoundException("Provider not found"));
+
+        if (availabilityRepository.existsByProviderAndDayOfWeekAndStartTimeAndEndTime(provider,
+                request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
+            throw new IllegalArgumentException("Availability for this day and time already exists");
+        }
 
         Availability availability = new Availability();
         availability.setProvider(provider);

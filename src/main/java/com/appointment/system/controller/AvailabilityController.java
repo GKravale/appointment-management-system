@@ -3,6 +3,7 @@ package com.appointment.system.controller;
 import com.appointment.system.dto.request.CreateAvailabilityRequest;
 import com.appointment.system.security.CustomUserDetails;
 import com.appointment.system.service.AvailabilityService;
+import com.appointment.system.service.TimeBlockService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,8 @@ public class AvailabilityController {
 
     private final AvailabilityService availabilityService;
 
+    private final TimeBlockService timeBlockService;
+
     @GetMapping
     public String availabilityPage(
             @AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -26,6 +29,8 @@ public class AvailabilityController {
                 availabilityService.getAvailability(user.getPersonId()));
         model.addAttribute("createRequest", new CreateAvailabilityRequest());
         model.addAttribute("days", availabilityService.getAllDays());
+        model.addAttribute("timeBlocks", timeBlockService.getTimeBlocks(user.getPersonId()));
+        model.addAttribute("blockTypes", timeBlockService.getAllBlockTypes());
         return "provider/availability";
     }
 
@@ -41,9 +46,10 @@ public class AvailabilityController {
             model.addAttribute("availabilities",
                     availabilityService.getAvailability(user.getPersonId()));
             model.addAttribute("days", availabilityService.getAllDays());
+            model.addAttribute("timeBlocks", timeBlockService.getTimeBlocks(user.getPersonId()));
+            model.addAttribute("blockTypes", timeBlockService.getAllBlockTypes());
             return "provider/availability";
         }
-
         try {
             availabilityService.create(user.getPersonId(), request);
             redirectAttributes.addFlashAttribute("successMessage",

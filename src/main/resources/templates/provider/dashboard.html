@@ -6,53 +6,100 @@
 <head><title>Provider Dashboard</title></head>
 <body>
 <div layout:fragment="content">
-    <h2 class="mb-4">Welcome back, <span th:text="${username}"></span></h2>
-    <div class="row g-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Welcome back, <span th:text="${username}"></span></h2>
+        <a th:href="@{/provider/schedule}" class="btn btn-primary btn-sm">
+            <i class="bi bi-calendar3 me-1"></i>Open schedule
+        </a>
+    </div>
+
+    <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-calendar-week me-2"></i>Appointments
-                    </h5>
-                    <p class="card-text text-muted">Manage incoming and upcoming bookings</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm">View all</a>
+            <div class="card text-center h-100">
+                <div class="card-body py-4">
+                    <div class="fs-1 fw-bold text-warning"
+                         th:text="${pendingCount}">0</div>
+                    <div class="text-muted small">Pending requests</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-scissors me-2"></i>My services
-                    </h5>
-                    <p class="card-text text-muted">Add and manage the services you offer</p>
-                    <a th:href="@{/provider/services}" class="btn btn-outline-primary btn-sm">Manage services</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-clock me-2"></i>Availability
-                    </h5>
-                    <p class="card-text text-muted">Set your working hours and time off</p>
-                    <a th:href="@{/provider/availability}" class="btn btn-outline-primary btn-sm">Set availability</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-person-badge me-2"></i>My profile
-                    </h5>
-                    <p class="card-text text-muted">Update your bio, location and portfolio</p>
-                    <a th:href="@{/provider/profile}" class="btn btn-outline-primary btn-sm">Edit profile</a>
+            <div class="card text-center h-100">
+                <div class="card-body py-4">
+                    <div class="fs-1 fw-bold text-primary"
+                         th:text="${todayCount}">0</div>
+                    <div class="text-muted small">Appointments today</div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row g-3">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Pending requests</h6>
+                    <a th:href="@{/provider/appointments}"
+                       class="btn btn-sm btn-outline-primary">View all</a>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(recentAppointments)}"
+                         class="text-muted text-center py-4">
+                        No pending requests.
+                    </div>
+                    <div th:each="apt : ${recentAppointments}"
+                         class="d-flex justify-content-between align-items-center
+                                px-3 py-2 border-bottom">
+                        <div>
+                            <span class="fw-semibold"
+                                  th:text="${apt.clientFirstName + ' ' +
+                                            apt.clientLastName}"></span>
+                            <span class="text-muted small ms-2"
+                                  th:text="${apt.serviceTitleSnapshot}"></span>
+                            <div class="text-muted small">
+                                <span th:text="${#temporals.format(apt.startTime,
+                                               'EEE dd MMM HH:mm')}"></span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <form th:action="@{/provider/appointments/{id}/confirm
+                                             (id=${apt.id})}" method="post">
+                                <button class="btn btn-success btn-sm">Confirm</button>
+                            </form>
+                            <form th:action="@{/provider/appointments/{id}/decline
+                                             (id=${apt.id})}" method="post">
+                                <button class="btn btn-outline-danger btn-sm">Decline</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick links</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a th:href="@{/provider/services}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-scissors me-2"></i>Manage services
+                    </a>
+                    <a th:href="@{/provider/availability}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-clock me-2"></i>Set availability
+                    </a>
+                    <a th:href="@{/provider/profile}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-person-badge me-2"></i>Edit profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>
