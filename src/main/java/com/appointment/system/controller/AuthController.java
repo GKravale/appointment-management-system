@@ -121,18 +121,23 @@ public class AuthController {
 
     @PostMapping("/change-password")
     public String changePassword(@AuthenticationPrincipal CustomUserDetails currentUser, @Valid @ModelAttribute(
-                                         "changeRequest") ChangePasswordRequest request, BindingResult bindingResult,
+            "changeRequest") ChangePasswordRequest request, BindingResult bindingResult,
                                  RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "auth/change-password";
         }
         try {
             userService.changePassword(currentUser.getId(), request);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Password changed successfully.");
-            return "redirect:/auth/change-password";
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully.");
+            String role = currentUser.getRole().name();
+            if (role.equals("ROLE_PROVIDER")) {
+                return "redirect:/provider/profile";
+            } else if (role.equals("ROLE_CLIENT")) {
+                return "redirect:/client/profile";
+            }
+            return "redirect:/";
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
             return "redirect:/auth/change-password";
         }
     }

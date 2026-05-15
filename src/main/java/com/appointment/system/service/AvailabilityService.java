@@ -42,9 +42,15 @@ public class AvailabilityService {
         Provider provider = providerRepository.findById(personId)
                 .orElseThrow(() -> new EntityNotFoundException("Provider not found"));
 
-        if (availabilityRepository.existsByProviderAndDayOfWeekAndStartTimeAndEndTime(provider,
-                request.getDayOfWeek(), request.getStartTime(), request.getEndTime())) {
-            throw new IllegalArgumentException("Availability for this day and time already exists");
+        List<Availability> existing = availabilityRepository.findByProviderAndDayOfWeek(provider,
+                request.getDayOfWeek());
+
+        boolean overlaps = existing.stream().anyMatch(a ->
+                request.getStartTime().isBefore(a.getEndTime()) && request.getEndTime().isAfter(a.getStartTime()));
+
+        if (overlaps) {
+            throw new IllegalArgumentException("This time slot overlaps with an existing availability slot for this " +
+                    "day");
         }
 
         Availability availability = new Availability();
