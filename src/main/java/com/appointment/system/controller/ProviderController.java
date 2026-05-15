@@ -7,6 +7,9 @@ import com.appointment.system.enums.AppointmentStatus;
 import com.appointment.system.security.CustomUserDetails;
 import com.appointment.system.service.AppointmentService;
 import com.appointment.system.service.ProviderService;
+import com.appointment.system.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +29,9 @@ import java.util.Map;
 public class ProviderController {
 
     private final ProviderService providerService;
-
     private final AppointmentService appointmentService;
+    private final UserService userService;
+
 
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -36,7 +40,7 @@ public class ProviderController {
         long pending = all.stream().filter(a -> a.getStatus() == AppointmentStatus.REQUESTED).count();
         long confirmedToday =
                 all.stream().filter(a -> a.getStatus() == AppointmentStatus.CONFIRMED && a.getStartTime().toLocalDate()
-                .equals(java.time.LocalDate.now())).count();
+                        .equals(java.time.LocalDate.now())).count();
         model.addAttribute("pendingCount", pending);
         model.addAttribute("todayCount", confirmedToday);
         model.addAttribute("recentAppointments", all.stream()
@@ -78,6 +82,16 @@ public class ProviderController {
         providerService.updateProfile(user.getPersonId(), request);
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully");
         return "redirect:/provider/profile";
+    }
+
+    @PostMapping("/delete-account")
+    public String deleteAccount(@AuthenticationPrincipal CustomUserDetails currentUser, HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
+        userService.deleteAccount(currentUser.getId());
+        new org.springframework.security.web.authentication.logout
+                .SecurityContextLogoutHandler()
+                .logout(request, response, null);
+        return "redirect:/auth/login?deleted=true";
     }
 
     @GetMapping("/appointments")
@@ -145,8 +159,7 @@ public class ProviderController {
 
     @GetMapping("/schedule/events")
     @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> scheduleEvents(
-            @AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<List<Map<String, Object>>> scheduleEvents(@AuthenticationPrincipal CustomUserDetails user) {
         List<Map<String, Object>> events = appointmentService
                 .getProviderAppointments(user.getPersonId())
                 .stream()

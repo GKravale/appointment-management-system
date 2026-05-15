@@ -9,11 +9,10 @@ import com.appointment.system.entity.User;
 import com.appointment.system.repository.ProviderServiceOfferingRepository;
 import com.appointment.system.repository.UserRepository;
 import com.appointment.system.security.CustomUserDetails;
-import com.appointment.system.service.AppointmentService;
-import com.appointment.system.service.ClientService;
-import com.appointment.system.service.EmailService;
-import com.appointment.system.service.NotificationService;
+import com.appointment.system.service.*;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -46,6 +45,8 @@ public class ClientController {
     private final NotificationService notificationService;
 
     private final EmailService emailService;
+
+    private final UserService userService;
 
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -141,6 +142,16 @@ public class ClientController {
         clientService.updateProfile(user.getPersonId(), request);
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully");
         return "redirect:/client/profile";
+    }
+
+    @PostMapping("/delete-account")
+    public String deleteAccount(@AuthenticationPrincipal CustomUserDetails currentUser, HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
+        userService.deleteAccount(currentUser.getId());
+        new org.springframework.security.web.authentication.logout
+                .SecurityContextLogoutHandler()
+                .logout(request, response, null);
+        return "redirect:/auth/login?deleted=true";
     }
 
     @GetMapping("/request")

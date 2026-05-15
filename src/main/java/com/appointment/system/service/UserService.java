@@ -155,4 +155,14 @@ public class UserService {
 
         log.info("Password changed for user: {}", user.getUsername());
     }
+
+    @Transactional
+    public void deleteAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setAccountStatus(AccountStatus.SUSPENDED);
+        user.getPerson().setIsDeleted(true);
+        userRepository.save(user);
+        log.info("Account deleted for user: {}", user.getUsername());
+    }
 }

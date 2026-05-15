@@ -94,6 +94,25 @@
           </form>
         </div>
       </div>
+
+      <div class="card border-danger mt-4">
+        <div class="card-header text-danger">
+          <h6 class="mb-0">Danger zone</h6>
+        </div>
+        <div class="card-body">
+          <p class="text-muted small mb-3">
+            Deleting your account is permanent. All your data will be
+            removed after 30 days.
+          </p>
+          <form th:action="@{/provider/delete-account}" method="post"
+                onsubmit="return confirm(
+                  'Are you sure? This cannot be undone.')">
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+              Delete my account
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>

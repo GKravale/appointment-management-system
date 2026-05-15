@@ -44,7 +44,8 @@ public class SecurityConfig {
         http.authenticationProvider(authenticationProvider()).authorizeHttpRequests(auth -> auth.requestMatchers("/",
                 "/auth/login", "/auth/register", "/providers", "/providers/{id}", "/css/**", "/js/**", "/uploads/**",
                 "/webjars/**", "/client/slots/debug", "/auth/forgot-password",
-                "/auth/reset-password").permitAll().requestMatchers("/admin/**").hasAuthority(
+                "/auth/reset-password","/privacy",
+                "/terms").permitAll().requestMatchers("/admin/**").hasAuthority(
                         "ROLE_ADMIN").requestMatchers(
                 "/provider/**").hasAuthority("ROLE_PROVIDER").requestMatchers("/client/**").hasAuthority(
                 "ROLE_CLIENT").anyRequest().authenticated()).formLogin(form ->

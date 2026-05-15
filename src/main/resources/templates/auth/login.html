@@ -20,6 +20,9 @@
                     <div th:if="${param.logout}" class="alert alert-success">
                         You have been logged out.
                     </div>
+                    <div th:if="${param.deleted}" class="alert alert-info">
+                        Your account has been deleted. We're sorry to see you go.
+                    </div>
 
                     <form th:action="@{/auth/login}" method="post">
                         <div class="mb-3">

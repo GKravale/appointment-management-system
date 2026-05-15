@@ -10,4 +10,14 @@ public class HomeController {
     public String home() {
         return "home";
     }
+
+    @GetMapping("/privacy")
+    public String privacyPolicy() {
+        return "legal/privacy";
+    }
+
+    @GetMapping("/terms")
+    public String termsOfService() {
+        return "legal/terms";
+    }
 }

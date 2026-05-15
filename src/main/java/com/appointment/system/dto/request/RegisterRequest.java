@@ -42,4 +42,7 @@ public class RegisterRequest {
 
     @NotNull
     private Role role;
+
+    @AssertTrue(message = "You must accept the terms and conditions")
+    private Boolean acceptTerms = false;
 }
