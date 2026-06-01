@@ -44,6 +44,15 @@ public class AppointmentChange {
     @Column(name = "changed_at", nullable = false, updatable = false)
     private LocalDateTime changedAt;
 
+    public AppointmentChange(Appointment appointment, User changedBy, ChangeType type, LocalDateTime oldStart, LocalDateTime newStart, String reason) {
+        this.appointment = appointment;
+        this.changedBy = changedBy;
+        this.type = type;
+        this.oldStart = oldStart;
+        this.newStart = newStart;
+        this.reason = reason;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.changedAt = LocalDateTime.now();

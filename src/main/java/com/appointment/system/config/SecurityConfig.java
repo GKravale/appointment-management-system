@@ -41,12 +41,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authenticationProvider(authenticationProvider()).authorizeHttpRequests(auth -> auth.requestMatchers("/",
-                "/auth/login", "/auth/register", "/providers", "/providers/{id}", "/css/**", "/js/**", "/uploads/**",
-                "/webjars/**", "/client/slots/debug", "/auth/forgot-password",
-                "/auth/reset-password","/privacy",
-                "/terms").permitAll().requestMatchers("/admin/**").hasAuthority(
-                        "ROLE_ADMIN").requestMatchers(
+        http.authenticationProvider(authenticationProvider()).authorizeHttpRequests(auth
+                -> auth.requestMatchers("/", "/auth/login", "/auth/register", "/auth/forgot-password",
+                "/auth/reset-password", "/auth/verify-email", "/auth/resend-verification",
+                "/providers", "/providers/**", "/privacy", "/terms", "/css/**",
+                "/js/**", "/uploads/**", "/webjars/**"
+        ).permitAll().requestMatchers("/admin/**").hasAuthority(
+                "ROLE_ADMIN").requestMatchers(
                 "/provider/**").hasAuthority("ROLE_PROVIDER").requestMatchers("/client/**").hasAuthority(
                 "ROLE_CLIENT").anyRequest().authenticated()).formLogin(form ->
                 form.loginPage("/auth" + "/login").usernameParameter("username").passwordParameter("password")

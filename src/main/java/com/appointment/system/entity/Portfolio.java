@@ -29,4 +29,8 @@ public class Portfolio {
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<MediaAsset> mediaAssets = new ArrayList<>();
+
+    public Portfolio(Provider provider) {
+        this.provider = provider;
+    }
 }

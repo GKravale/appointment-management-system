@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface MediaAssetRepository extends JpaRepository<MediaAsset, Long> {
 
-    List<MediaAsset> findByPortfolio(Portfolio portfolio);
+    List<MediaAsset> findByPortfolioAndInPortfolioTrue(Portfolio portfolio);
 }

@@ -57,8 +57,9 @@ public class AuthController {
         try {
             userService.register(request);
             String msg = request.getRole() == Role.ROLE_PROVIDER
-                    ? "Registration submitted. Your account is pending admin approval."
-                    : "Registration successful, please log in";
+                    ? "Registration submitted. Please check your email to verify your address, then wait for admin " +
+                    "approval."
+                    : "Registration successful! Please check your email to verify your address before logging in.";
             redirectAttributes.addFlashAttribute("successMessage", msg);
             return "redirect:/auth/login";
         } catch (IllegalArgumentException e) {
@@ -140,5 +141,35 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
             return "redirect:/auth/change-password";
         }
+    }
+
+    @GetMapping("/verify-email")
+    public String verifyEmail(@RequestParam String token, RedirectAttributes redirectAttributes) {
+        try {
+            userService.verifyEmail(token);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Email verified! You can now log in.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/auth/login";
+    }
+
+    @GetMapping("/resend-verification")
+    public String resendVerificationPage() {
+        return "auth/resend-verification";
+    }
+
+    @PostMapping("/resend-verification")
+    public String resendVerification(@RequestParam String email,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            userService.resendVerificationEmail(email);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Verification email sent. Please check your inbox.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/auth/login";
     }
 }

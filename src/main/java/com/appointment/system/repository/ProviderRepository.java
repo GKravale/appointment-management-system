@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ProviderRepository extends JpaRepository<Provider, Long> {
 
-    List<Provider> findByIsActiveTrue();
+    List<Provider> findByIsActiveTrueAndIsDeletedFalse();
 }

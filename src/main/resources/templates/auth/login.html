@@ -23,6 +23,13 @@
                     <div th:if="${param.deleted}" class="alert alert-info">
                         Your account has been deleted. We're sorry to see you go.
                     </div>
+                    <div th:if="${param.expired}" class="alert alert-warning">
+                        Your session has expired. Please log in again.
+                    </div>
+                    <div th:if="${param.error}" class="alert alert-danger">
+                        Invalid username or password, or your account is not yet active.
+                        <a th:href="@{/auth/resend-verification}" class="alert-link">Resend verification email?</a>
+                    </div>
 
                     <form th:action="@{/auth/login}" method="post">
                         <div class="mb-3">

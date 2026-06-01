@@ -37,12 +37,23 @@ public class MediaAsset {
     @Column(name = "alt_text")
     private String altText;
 
+    @Column(name = "in_portfolio", nullable = false)
+    private Boolean inPortfolio = false;
+
     @Column(name = "uploaded_at", nullable = false, updatable = false)
     private LocalDateTime uploadedAt;
 
     @OneToMany(mappedBy = "mediaAsset", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<PostMedia> postMediaList = new ArrayList<>();
+
+    public MediaAsset(Portfolio portfolio, String filePath, MediaType mediaType, String altText, Boolean inPortfolio) {
+        this.portfolio = portfolio;
+        this.filePath = filePath;
+        this.mediaType = mediaType;
+        this.altText = altText;
+        this.inPortfolio = inPortfolio;
+    }
 
     @PrePersist
     protected void onUpload() {

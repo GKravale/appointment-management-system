@@ -13,6 +13,34 @@
            class="btn btn-sm btn-outline-secondary">Back</a>
     </div>
 
+    <form th:action="@{/admin/appointments}" method="get"
+          class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                <option th:each="s : ${statuses}"
+                        th:value="${s}"
+                        th:text="${s}"
+                        th:selected="${selectedStatus == s.name()}"></option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Provider name</label>
+            <input type="text" name="providerName"
+                   class="form-control"
+                   th:value="${selectedProvider}"
+                   placeholder="Search by provider name"/>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <a th:href="@{/admin/appointments}"
+               class="btn btn-outline-secondary w-100">Clear</a>
+        </div>
+    </form>
+
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">

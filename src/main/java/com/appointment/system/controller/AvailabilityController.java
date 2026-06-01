@@ -6,6 +6,7 @@ import com.appointment.system.service.AvailabilityService;
 import com.appointment.system.service.TimeBlockService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequestMapping("/provider/availability")
 @RequiredArgsConstructor
@@ -23,8 +25,7 @@ public class AvailabilityController {
     private final TimeBlockService timeBlockService;
 
     @GetMapping
-    public String availabilityPage(
-            @AuthenticationPrincipal CustomUserDetails user, Model model) {
+    public String availabilityPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
         model.addAttribute("availabilities",
                 availabilityService.getAvailability(user.getPersonId()));
         model.addAttribute("createRequest", new CreateAvailabilityRequest());
@@ -35,16 +36,11 @@ public class AvailabilityController {
     }
 
     @PostMapping("/create")
-    public String create(
-            @AuthenticationPrincipal CustomUserDetails user,
-            @Valid @ModelAttribute("createRequest") CreateAvailabilityRequest request,
-            BindingResult bindingResult,
-            Model model,
-            RedirectAttributes redirectAttributes) {
-
+    public String create(@AuthenticationPrincipal CustomUserDetails user,
+                         @Valid @ModelAttribute("createRequest") CreateAvailabilityRequest request,
+                         BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("availabilities",
-                    availabilityService.getAvailability(user.getPersonId()));
+            model.addAttribute("availabilities", availabilityService.getAvailability(user.getPersonId()));
             model.addAttribute("days", availabilityService.getAllDays());
             model.addAttribute("timeBlocks", timeBlockService.getTimeBlocks(user.getPersonId()));
             model.addAttribute("blockTypes", timeBlockService.getAllBlockTypes());
@@ -52,8 +48,9 @@ public class AvailabilityController {
         }
         try {
             availabilityService.create(user.getPersonId(), request);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Availability added");
+            log.info("Provider {} created availability on {} from {} to {}", user.getPersonId(), request.getDayOfWeek(),
+                    request.getStartTime(), request.getEndTime());
+            redirectAttributes.addFlashAttribute("successMessage", "Availability added");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -61,12 +58,11 @@ public class AvailabilityController {
     }
 
     @PostMapping("/delete/{id}")
-    public String delete(
-            @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails user,
-            RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user,
+                         RedirectAttributes redirectAttributes) {
         availabilityService.delete(id, user.getPersonId());
         redirectAttributes.addFlashAttribute("successMessage", "Availability removed");
+        log.info("Provider {} deleted availability {}", user.getPersonId(), id);
         return "redirect:/provider/availability";
     }
 }

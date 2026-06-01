@@ -39,4 +39,11 @@ public class Availability {
 
     @Column(name = "effective_to")
     private LocalDate effectiveTo;
+
+    public Availability(Provider provider, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime) {
+        this.provider = provider;
+        this.dayOfWeek = dayOfWeek;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 }

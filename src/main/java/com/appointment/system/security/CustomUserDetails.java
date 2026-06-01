@@ -23,6 +23,9 @@ public class CustomUserDetails implements UserDetails {
     private final AccountStatus accountStatus;
 
     public CustomUserDetails(User user) {
+        if (user == null) {
+            throw new RuntimeException("CustomUserDetails created with null user", new Exception("STACKTRACE"));
+        }
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();

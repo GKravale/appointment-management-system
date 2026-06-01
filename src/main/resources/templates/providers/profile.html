@@ -13,8 +13,13 @@
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-body text-center py-4">
-                    <div class="bg-secondary rounded-circle d-inline-flex align-items-center
-                                justify-content-center mb-3"
+                    <img th:if="${provider.profilePicturePath != null}"
+                         th:src="@{/{p}(p=${provider.profilePicturePath})}"
+                         th:alt="${provider.firstName}"
+                         class="rounded-circle mb-3"
+                         style="width:80px;height:80px;object-fit:cover;"/>
+                    <div th:unless="${provider.profilePicturePath != null}"
+                         class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
                          style="width:80px;height:80px;">
                         <i class="bi bi-person-fill text-white fs-2"></i>
                     </div>
@@ -94,9 +99,200 @@
                     </div>
                 </div>
             </div>
+            <div th:unless="${#lists.isEmpty(assets)}" class="mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Portfolio</h5>
+                </div>
+                <div class="row g-2">
+                    <div class="col-4" th:each="asset, stat : ${assets}"
+                         th:if="${stat.index < 6}">
+                        <img th:src="@{/{p}(p=${asset.filePath})}"
+                             th:alt="${asset.altText ?: 'Portfolio image'}"
+                             class="img-fluid rounded public-portfolio-img"
+                             style="height:120px;width:100%;
+                        object-fit:cover;cursor:pointer;"
+                             th:data-index="${stat.index}"
+                             th:data-src="@{/{p}(p=${asset.filePath})}"
+                             th:data-alt="${asset.altText ?: ''}"
+                             onclick="openLightbox(this)"/>
+                    </div>
+                </div>
+                <div th:if="${#lists.size(assets) > 6}" class="mt-2">
+                    <button class="btn btn-sm btn-outline-secondary"
+                            id="showAllPortfolio"
+                            onclick="showAllPortfolio()">
+                        Show all (<span th:text="${#lists.size(assets)}"></span> images)
+                    </button>
+                    <div id="extraPortfolio" class="row g-2 mt-1" style="display:none;">
+                        <div class="col-4" th:each="asset, stat : ${assets}"
+                             th:if="${stat.index >= 6}">
+                            <img th:src="@{/{p}(p=${asset.filePath})}"
+                                 th:alt="${asset.altText ?: ''}"
+                                 class="img-fluid rounded public-portfolio-img"
+                                 style="height:120px;width:100%;
+                            object-fit:cover;cursor:pointer;"
+                                 th:data-index="${stat.index}"
+                                 th:data-src="@{/{p}(p=${asset.filePath})}"
+                                 th:data-alt="${asset.altText ?: ''}"
+                                 onclick="openLightbox(this)"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:unless="${#lists.isEmpty(posts)}" class="mt-4">
+                <h5 class="mb-3">Posts</h5>
+                <div th:each="post, stat : ${posts}" th:if="${stat.index < 3}"
+                     class="card mb-3">
+                    <div class="card-body">
+                        <p th:if="${post.contentText != null}"
+                           class="mb-3" th:text="${post.contentText}"></p>
+                        <div th:unless="${#lists.isEmpty(post.postMediaList)}"
+                             class="row g-2 mb-2">
+                            <div class="col-4"
+                                 th:each="pm, pstat : ${post.postMediaList}"
+                                 th:if="${pstat.index < 3}">
+                                <img th:if="${pm.mediaAsset.mediaType.name() == 'IMAGE'}"
+                                     th:src="@{/{p}(p=${pm.mediaAsset.filePath})}"
+                                     class="img-fluid rounded"
+                                     style="height:100px;width:100%;object-fit:cover;cursor:pointer;"
+                                     th:alt="${pm.mediaAsset.altText}"
+                                     onclick="openFeedImage(this.src)"/>
+                            </div>
+                        </div>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(post.createdAt,
+                            'dd MMM yyyy')}"></small>
+                    </div>
+                </div>
+                <div th:if="${totalPosts > 3}" class="text-center">
+                    <button class="btn btn-outline-secondary btn-sm"
+                            id="showMorePosts" onclick="showMorePosts()">
+                        Show more posts
+                    </button>
+                    <div id="extraPosts" style="display:none;">
+                        <div th:each="post, stat : ${posts}"
+                             th:if="${stat.index >= 3}"
+                             class="card mb-3 text-start">
+                            <div class="card-body">
+                                <p th:if="${post.contentText != null}"
+                                   th:text="${post.contentText}" class="mb-2"></p>
+                                <small class="text-muted"
+                                       th:text="${#temporals.format(post.createdAt,
+                                    'dd MMM yyyy')}"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="feedImgModal" tabindex="-1"
+                 aria-label="Post image">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content bg-dark">
+                        <div class="modal-header border-0">
+                            <button type="button" class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center p-0 d-flex
+                        align-items-center justify-content-center"
+                             style="min-height:40vh;">
+                            <img id="feedImgSrc" src="" alt="Post image"
+                                 class="img-fluid"
+                                 style="max-height:80vh;object-fit:contain;"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="lightboxModal" tabindex="-1"
+                 aria-label="Image viewer">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content bg-dark">
+                        <div class="modal-header border-0">
+                            <p class="text-white-50 mb-0" id="lightboxCaption"></p>
+                            <button type="button" class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center p-0 position-relative d-flex
+            align-items-center justify-content-center"
+                             style="min-height:50vh;">
+                            <button class="btn btn-dark position-absolute start-0
+                   top-50 translate-middle-y ms-2 z-3"
+                                    id="prevBtn" onclick="changeImage(-1)"
+                                    aria-label="Previous">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <img id="lightboxImg" src="" alt=""
+                                 class="img-fluid"
+                                 style="max-height:75vh;max-width:100%;object-fit:contain;"/>
+                            <button class="btn btn-dark position-absolute end-0
+                   top-50 translate-middle-y me-2 z-3"
+                                    id="nextBtn" onclick="changeImage(1)"
+                                    aria-label="Next">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function openFeedImage(src) {
+            document.getElementById('feedImgSrc').src = src;
+            new bootstrap.Modal(document.getElementById('feedImgModal')).show();
+        }
+
+        const images = [];
+        document.querySelectorAll('.public-portfolio-img').forEach(function (img) {
+            images.push({src: img.dataset.src, alt: img.dataset.alt});
+        });
+
+        let currentIndex = 0;
+
+        function openLightbox(el) {
+            currentIndex = parseInt(el.dataset.index);
+            updateLightbox();
+            new bootstrap.Modal(document.getElementById('lightboxModal')).show();
+        }
+
+        function changeImage(dir) {
+            currentIndex = (currentIndex + dir + images.length) % images.length;
+            updateLightbox();
+        }
+
+        function updateLightbox() {
+            document.getElementById('lightboxImg').src = images[currentIndex].src;
+            document.getElementById('lightboxImg').alt = images[currentIndex].alt;
+            document.getElementById('lightboxCaption').textContent =
+                images[currentIndex].alt;
+            const show = images.length > 1;
+            document.getElementById('prevBtn').style.display = show ? '' : 'none';
+            document.getElementById('nextBtn').style.display = show ? '' : 'none';
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (!document.getElementById('lightboxModal')
+                .classList.contains('show')) return;
+            if (e.key === 'ArrowLeft') changeImage(-1);
+            if (e.key === 'ArrowRight') changeImage(1);
+        });
+
+        function showAllPortfolio() {
+            document.getElementById('extraPortfolio').style.display = '';
+            document.getElementById('showAllPortfolio').style.display = 'none';
+        }
+
+        function showMorePosts() {
+            document.getElementById('extraPosts').style.display = '';
+            document.getElementById('showMorePosts').style.display = 'none';
+        }
+
+        /*]]>*/
+    </script>
+</th:block>
 </body>
 </html>

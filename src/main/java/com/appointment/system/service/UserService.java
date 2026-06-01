@@ -5,12 +5,14 @@ import com.appointment.system.dto.request.ForgotPasswordRequest;
 import com.appointment.system.dto.request.RegisterRequest;
 import com.appointment.system.dto.request.ResetPasswordRequest;
 import com.appointment.system.entity.Client;
+import com.appointment.system.entity.EmailVerificationToken;
 import com.appointment.system.entity.PasswordResetToken;
 import com.appointment.system.entity.Provider;
 import com.appointment.system.entity.User;
 import com.appointment.system.enums.AccountStatus;
 import com.appointment.system.enums.Role;
 import com.appointment.system.repository.ClientRepository;
+import com.appointment.system.repository.EmailVerificationTokenRepository;
 import com.appointment.system.repository.PasswordResetTokenRepository;
 import com.appointment.system.repository.ProviderRepository;
 import com.appointment.system.repository.UserRepository;
@@ -33,6 +35,7 @@ public class UserService {
     private final ProviderRepository providerRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailService emailService;
 
     @Transactional
@@ -50,6 +53,7 @@ public class UserService {
             throw new IllegalArgumentException("Cannot register as admin");
         }
 
+        User user;
         if (request.getRole() == Role.ROLE_CLIENT) {
             Client client = new Client(
                     request.getFirstName(),
@@ -58,15 +62,14 @@ public class UserService {
             );
             clientRepository.save(client);
 
-            User user = new User(
+            user = new User(
                     request.getUsername(),
                     passwordEncoder.encode(request.getPassword()),
                     request.getEmail(),
                     Role.ROLE_CLIENT,
                     client
             );
-            userRepository.save(user);
-
+            user.setAccountStatus(AccountStatus.PENDING_VERIFICATION);
         } else {
             Provider provider = new Provider(
                     request.getFirstName(),
@@ -77,16 +80,67 @@ public class UserService {
             );
             providerRepository.save(provider);
 
-            User user = new User(
+            user = new User(
                     request.getUsername(),
                     passwordEncoder.encode(request.getPassword()),
                     request.getEmail(),
                     Role.ROLE_PROVIDER,
                     provider
             );
-            user.setAccountStatus(AccountStatus.PENDING);
-            userRepository.save(user);
+            user.setAccountStatus(AccountStatus.PENDING_VERIFICATION);
         }
+        userRepository.save(user);
+
+        String token = java.util.UUID.randomUUID().toString();
+        emailVerificationTokenRepository.save(new EmailVerificationToken(user, token));
+        emailService.sendEmailVerification(user.getEmail(), user.getUsername(), token);
+
+        log.info("Registered user: {} — awaiting email verification", user.getUsername());
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        EmailVerificationToken verificationToken =
+                emailVerificationTokenRepository.findByToken(token)
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid verification link"));
+
+        if (verificationToken.isExpired()) {
+            throw new IllegalArgumentException("This verification link has expired. Please request a new one.");
+        }
+        if (verificationToken.getUsed()) {
+            throw new IllegalArgumentException("This verification link has already been used.");
+        }
+
+        User user = verificationToken.getUser();
+        user.setEmailVerified(true);
+
+        // Clients become ACTIVE immediately; providers still need admin approval
+        if (user.getRole() == Role.ROLE_CLIENT) {
+            user.setAccountStatus(AccountStatus.ACTIVE);
+        } else {
+            user.setAccountStatus(AccountStatus.PENDING);
+        }
+
+        userRepository.save(user);
+        verificationToken.setUsed(true);
+        emailVerificationTokenRepository.save(verificationToken);
+        log.info("Email verified for user: {}", user.getUsername());
+    }
+
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("No account found with that email"));
+
+        if (Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new IllegalArgumentException("Email is already verified");
+        }
+
+        emailVerificationTokenRepository.deleteByUser(user);
+        String token = java.util.UUID.randomUUID().toString();
+        emailVerificationTokenRepository.save(new EmailVerificationToken(user, token));
+        emailService.sendEmailVerification(user.getEmail(), user.getUsername(), token);
+        log.info("Resent verification email for user: {}", user.getUsername());
     }
 
     public boolean usernameExists(String username) {
@@ -124,7 +178,7 @@ public class UserService {
             throw new IllegalArgumentException("This reset link has expired. Please request a new one.");
         }
 
-        if (resetToken.getUsed()) {
+        if (Boolean.TRUE.equals(resetToken.getUsed())) {
             throw new IllegalArgumentException("This reset link has already been used.");
         }
 

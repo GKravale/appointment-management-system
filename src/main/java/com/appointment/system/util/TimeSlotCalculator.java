@@ -17,7 +17,6 @@ public class TimeSlotCalculator {
                                                        List<TimeBlock> timeBlocks,
                                                        List<Appointment> existingAppointments, int durationMinutes,
                                                        int bufferMinutes) {
-
         List<LocalDateTime> slots = new ArrayList<>();
 
         List<Availability> dayAvailability = availabilities.stream()

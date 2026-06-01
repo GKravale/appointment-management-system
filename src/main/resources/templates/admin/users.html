@@ -13,6 +13,11 @@
            class="btn btn-sm btn-outline-secondary">Back</a>
     </div>
 
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control"
+               placeholder="Search by name, email, or username..."/>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">
@@ -47,21 +52,32 @@
                 <td th:text="${#temporals.format(user.createdAt,
                                  'dd MMM yyyy')}"></td>
                 <td>
-                    <form th:if="${user.accountStatus.name() != 'SUSPENDED'
-                                      and user.role.name() != 'ROLE_ADMIN'}"
-                          th:action="@{/admin/users/{id}/deactivate(id=${user.id})}"
-                          method="post"
-                          onsubmit="return confirm('Deactivate this user?')">
-                        <button class="btn btn-sm btn-outline-danger">
-                            Deactivate
-                        </button>
-                    </form>
+                    <div class="d-flex gap-2">
+                        <form th:if="${user.accountStatus.name() != 'SUSPENDED' and user.role.name() != 'ROLE_ADMIN'}"
+                              th:action="@{/admin/users/{id}/deactivate(id=${user.id})}"
+                              method="post"
+                              onsubmit="return confirm('Deactivate this user?')">
+                            <button class="btn btn-sm btn-outline-warning">Deactivate</button>
+                        </form>
+                        <form th:if="${user.accountStatus.name() == 'SUSPENDED'}"
+                              th:action="@{/admin/users/{id}/reactivate(id=${user.id})}"
+                              method="post">
+                            <button class="btn btn-sm btn-outline-success">Reactivate</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
-
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+    </script>
 </div>
 </body>
 </html>

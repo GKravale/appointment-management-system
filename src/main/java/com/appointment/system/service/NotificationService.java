@@ -23,9 +23,11 @@ public class NotificationService {
 
     public void send(User user, String message, String link) {
         notificationRepository.save(new Notification(user, message, link));
+        log.debug("Notification sent to user {}: {}", user.getId(), message);
     }
 
     public List<Notification> getForUser(User user) {
+        log.debug("Retrieving notifications for user {}", user.getId());
         return notificationRepository.findByUserOrderByCreatedAtDesc(user);
     }
 
@@ -37,10 +39,12 @@ public class NotificationService {
     public void markAllRead(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         notificationRepository.findByUserOrderByCreatedAtDesc(user).forEach(n -> n.setIsRead(true));
+        log.info("All notifications marked as read for user {}", userId);
     }
 
     @Transactional
     public void markRead(Long notificationId) {
         notificationRepository.findById(notificationId).ifPresent(n -> n.setIsRead(true));
+        log.debug("Notification {} marked as read", notificationId);
     }
 }

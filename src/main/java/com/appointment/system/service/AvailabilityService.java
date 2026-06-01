@@ -24,6 +24,7 @@ public class AvailabilityService {
     private final ProviderRepository providerRepository;
 
     public List<AvailabilityResponse> getAvailability(Long personId) {
+        log.info("Retrieving availability for provider {}", personId);
         Provider provider = providerRepository.findById(personId)
                 .orElseThrow(() -> new EntityNotFoundException("Provider not found"));
         return availabilityRepository.findByProvider(provider)
@@ -61,6 +62,8 @@ public class AvailabilityService {
         availability.setEffectiveFrom(request.getEffectiveFrom());
         availability.setEffectiveTo(request.getEffectiveTo());
         availabilityRepository.save(availability);
+        log.info("Availability created for provider {}: {} {}-{}", personId, request.getDayOfWeek(),
+                request.getStartTime(), request.getEndTime());
     }
 
     @Transactional
@@ -71,6 +74,7 @@ public class AvailabilityService {
             throw new SecurityException("Not authorized");
         }
         availabilityRepository.delete(availability);
+        log.info("Availability deleted: id={}, provider={}", availabilityId, personId);
     }
 
     public List<DayOfWeek> getAllDays() {

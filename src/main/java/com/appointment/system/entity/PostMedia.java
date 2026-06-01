@@ -27,4 +27,10 @@ public class PostMedia {
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
+
+    public PostMedia(Post post, MediaAsset mediaAsset, int sortOrder) {
+        this.post = post;
+        this.mediaAsset = mediaAsset;
+        this.sortOrder = sortOrder;
+    }
 }

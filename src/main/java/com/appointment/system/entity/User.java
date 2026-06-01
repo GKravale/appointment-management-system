@@ -46,6 +46,9 @@ public class User {
     @ToString.Exclude
     private Person person;
 
+    @Column(name = "email_verified", nullable = false)
+    private Boolean emailVerified = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

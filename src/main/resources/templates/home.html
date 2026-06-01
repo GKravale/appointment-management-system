@@ -2,15 +2,112 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/base}">
 <head><title>Home</title></head>
 <body>
 <div layout:fragment="content">
-  <div class="text-center py-5">
-    <h1 class="display-5 fw-bold">Find your next appointment</h1>
-    <p class="lead text-muted">Browse providers and book in seconds</p>
-    <a th:href="@{/providers}" class="btn btn-primary btn-lg mt-3">Browse providers</a>
-  </div>
+
+    <div sec:authorize="isAnonymous()">
+        <div class="text-center py-5 mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                Book your next appointment
+            </h1>
+            <p class="lead text-muted mb-4">
+                Find beauty and wellness professionals.
+                Browse services, check availability and book in minutes.
+            </p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a th:href="@{/providers}"
+                   class="btn btn-primary btn-lg px-4">
+                    Browse providers
+                </a>
+                <a th:href="@{/auth/register}"
+                   class="btn btn-outline-primary btn-lg px-4">
+                    Create account
+                </a>
+            </div>
+        </div>
+
+        <h4 class="mb-3">Browse by category</h4>
+        <div class="row g-3 mb-5">
+            <div class="col-6 col-md-3"
+                 th:each="cat : ${categoryIcons}">
+                <a th:href="@{/providers(category=${cat})}"
+                   class="card text-decoration-none text-center p-3 h-100 d-flex align-items-center justify-content-center">
+                    <div class="fw-semibold small"
+                         th:text="${cat}"></div>
+                </a>
+            </div>
+        </div>
+
+        <h4 class="mb-3">How it works</h4>
+        <div class="row g-3 mb-5">
+            <div class="col-md-4">
+                <div class="card text-center p-4 h-100">
+                    <i class="bi bi-search fs-2 mb-3"
+                       style="color:var(--color-primary)"
+                       aria-hidden="true"></i>
+                    <h6>Find a provider</h6>
+                    <p class="text-muted small mb-0">
+                        Browse by category or location.
+                        View portfolios and services.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4 h-100">
+                    <i class="bi bi-calendar-check fs-2 mb-3"
+                       style="color:var(--color-primary)"
+                       aria-hidden="true"></i>
+                    <h6>Pick a time</h6>
+                    <p class="text-muted small mb-0">
+                        Choose from available slots
+                        that fit your schedule.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4 h-100">
+                    <i class="bi bi-check-circle fs-2 mb-3"
+                       style="color:var(--color-primary)"
+                       aria-hidden="true"></i>
+                    <h6>Get confirmed</h6>
+                    <p class="text-muted small mb-0">
+                        Receive confirmation by email
+                        and manage everything online.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div sec:authorize="hasAuthority('ROLE_CLIENT')" class="text-center py-4">
+        <h4>Welcome back!</h4>
+        <div class="d-flex gap-3 justify-content-center mt-3">
+            <a th:href="@{/client/dashboard}"
+               class="btn btn-primary">Go to dashboard</a>
+            <a th:href="@{/providers}"
+               class="btn btn-outline-primary">Browse providers</a>
+        </div>
+    </div>
+
+    <div sec:authorize="hasAuthority('ROLE_PROVIDER')" class="text-center py-4">
+        <h4>Welcome back!</h4>
+        <div class="d-flex gap-3 justify-content-center mt-3">
+            <a th:href="@{/provider/dashboard}"
+               class="btn btn-primary">Go to dashboard</a>
+            <a th:href="@{/provider/schedule}"
+               class="btn btn-outline-primary">My schedule</a>
+        </div>
+    </div>
+
+    <div sec:authorize="hasAuthority('ROLE_ADMIN')" class="text-center py-4">
+        <h4>Admin panel</h4>
+        <a th:href="@{/admin/dashboard}"
+           class="btn btn-primary mt-3">Go to admin dashboard</a>
+    </div>
+
 </div>
 </body>
 </html>

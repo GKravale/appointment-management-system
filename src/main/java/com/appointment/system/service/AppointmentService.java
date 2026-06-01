@@ -36,6 +36,7 @@ public class AppointmentService {
     private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     public List<AppointmentResponse> getAllAppointments() {
+        log.info("Retrieving all appointments");
         return appointmentRepository.findAllByOrderByStartTimeDesc()
                 .stream()
                 .map(this::toResponse)
@@ -60,8 +61,10 @@ public class AppointmentService {
                 .filter(a -> a.getStartTime().toLocalDate().equals(date))
                 .toList();
 
-        return timeSlotCalculator.calculateAvailableSlots(date, availabilities, timeBlocks, existingAppointments,
+        List<LocalDateTime> availableSlots = timeSlotCalculator.calculateAvailableSlots(date, availabilities, timeBlocks, existingAppointments,
                 duration, buffer);
+        log.info("Retrieved available slots for offering {} on {}", providerServiceOfferingId, date);
+        return availableSlots;
     }
 
     @Transactional
@@ -72,6 +75,10 @@ public class AppointmentService {
 
         Client client = clientRepository.findById(clientPersonId)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found"));
+
+        if (appointmentRepository.existsActiveBookingForClientAtTime(client, request.getStartTime())) {
+            throw new IllegalStateException("You already have an appointment booked at this time.");
+        }
 
         Provider provider = offering.getProvider();
 
@@ -117,6 +124,7 @@ public class AppointmentService {
                 timeDisplay);
         emailService.sendNewBookingRequestToProvider(providerUser.getEmail(), providerName, clientName, serviceName,
                 timeDisplay);
+        log.info("Appointment booked: client={}, offering={}", clientPersonId, request.getProviderServiceOfferingId());
     }
 
     @Transactional
@@ -162,9 +170,11 @@ public class AppointmentService {
                 "/client/appointments");
 
         emailService.sendAppointmentDeclined(clientUser.getEmail(), clientName, providerName, serviceName, timeDisplay);
+        log.info("Appointment declined: id={}, provider={}", appointmentId, providerPersonId);
     }
 
     public List<AppointmentResponse> getClientAppointments(Long clientPersonId) {
+        log.debug("Retrieving appointments for client {}", clientPersonId);
         Client client = clientRepository.findById(clientPersonId)
                 .orElseThrow(() -> new EntityNotFoundException("Client not found"));
         return appointmentRepository.findByClientOrderByStartTimeDesc(client)
@@ -174,6 +184,7 @@ public class AppointmentService {
     }
 
     public List<AppointmentResponse> getProviderAppointments(Long providerPersonId) {
+        log.debug("Retrieving appointments for provider {}", providerPersonId);
         Provider provider = providerRepository.findById(providerPersonId)
                 .orElseThrow(() -> new EntityNotFoundException("Provider not found"));
         return appointmentRepository.findByProviderOrderByStartTimeDesc(provider)
@@ -188,6 +199,7 @@ public class AppointmentService {
         if (!appointment.getProvider().getId().equals(providerPersonId)) {
             throw new SecurityException("Not authorized");
         }
+        log.debug("Appointment found: id={}, provider={}", appointmentId, providerPersonId);
         return appointment;
     }
 
@@ -223,6 +235,7 @@ public class AppointmentService {
         }
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointment.setCompletedAt(LocalDateTime.now());
+        log.info("Appointment marked completed: id={}", appointmentId);
     }
 
     @Transactional
@@ -235,6 +248,7 @@ public class AppointmentService {
             throw new IllegalStateException("Cannot mark no-show before appointment time");
         }
         appointment.setStatus(AppointmentStatus.NO_SHOW);
+        log.info("Appointment marked no-show: id={}", appointmentId);
     }
 
     @Transactional
@@ -310,5 +324,6 @@ public class AppointmentService {
                 clientUser.getEmail(),
                 appointment.getClient().getFirstName(),
                 providerName, serviceName, timeDisplay);
+        log.info("Appointment cancelled by provider: id={}, provider={}", appointmentId, providerPersonId);
     }
 }

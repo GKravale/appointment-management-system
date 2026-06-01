@@ -2,7 +2,6 @@ package com.appointment.system.entity;
 
 import com.appointment.system.enums.BlockType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -36,4 +35,13 @@ public class TimeBlock {
 
     @Column(name = "note")
     private String note;
+
+    public TimeBlock(Provider provider, LocalDateTime startDateTime, LocalDateTime endDateTime, BlockType type,
+                     String note) {
+        this.provider = provider;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.type = type;
+        this.note = note;
+    }
 }

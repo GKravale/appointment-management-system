@@ -38,6 +38,11 @@ public class Post {
     @ToString.Exclude
     private List<PostMedia> postMediaList = new ArrayList<>();
 
+    public Post(Provider provider, String contentText) {
+        this.provider = provider;
+        this.contentText = contentText;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

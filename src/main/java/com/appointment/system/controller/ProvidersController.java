@@ -1,6 +1,9 @@
 package com.appointment.system.controller;
 
+import com.appointment.system.entity.Post;
 import com.appointment.system.enums.ServiceCategory;
+import com.appointment.system.service.PortfolioService;
+import com.appointment.system.service.PostService;
 import com.appointment.system.service.ProviderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -10,12 +13,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/providers")
 @RequiredArgsConstructor
 public class ProvidersController {
 
     private final ProviderService providerService;
+    private final PortfolioService portfolioService;
+    private final PostService postService;
 
     @GetMapping
     public String browseProviders(@RequestParam(required = false) ServiceCategory category, Model model) {
@@ -32,6 +39,10 @@ public class ProvidersController {
     @GetMapping("/{id}")
     public String providerProfile(@PathVariable Long id, Model model) {
         model.addAttribute("provider", providerService.getPublicProfile(id));
+        model.addAttribute("assets", portfolioService.getPortfolioAssets(id));
+        List<Post> allPosts = postService.getProviderPosts(id);
+        model.addAttribute("posts", allPosts);
+        model.addAttribute("totalPosts", allPosts.size());
         return "providers/profile";
     }
 }

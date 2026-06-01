@@ -99,6 +99,37 @@
             </div>
         </div>
     </div>
+    <div class="mt-4" th:unless="${#lists.isEmpty(recentPosts)}">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Recent posts</h5>
+            <a th:href="@{/provider/posts}"
+               class="btn btn-sm btn-outline-primary">All posts</a>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4" th:each="post : ${recentPosts}">
+                <a th:href="@{/provider/posts/{id}(id=${post.id})}"
+                   class="card h-100 text-decoration-none">
+                    <img th:if="${!#lists.isEmpty(post.postMediaList) and
+                      post.postMediaList[0].mediaAsset.mediaType.name()
+                      == 'IMAGE'}"
+                         th:src="@{/{p}(p=${post.postMediaList[0].mediaAsset.filePath})}"
+                         class="card-img-top"
+                         style="height:160px;object-fit:cover;"
+                         alt="Post image"/>
+                    <div class="card-body">
+                        <p class="card-text small"
+                           th:text="${post.contentText != null and
+                          post.contentText.length() > 80
+                          ? post.contentText.substring(0, 80) + '...'
+                          : (post.contentText ?: 'Image post')}"></p>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(post.createdAt,
+                            'dd MMM yyyy')}"></small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 
 </div>
 </body>

@@ -13,6 +13,11 @@
            class="btn btn-sm btn-outline-secondary">Back to dashboard</a>
     </div>
 
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control"
+               placeholder="Search by name, email, or username..."/>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">
@@ -42,17 +47,42 @@
                 <td th:text="${#temporals.format(user.createdAt,
                                  'dd MMM yyyy')}"></td>
                 <td>
-                    <div class="d-flex gap-2">
-                        <form th:if="${user.accountStatus.name() != 'ACTIVE'}"
+                    <div class="d-flex gap-2 flex-wrap">
+                        <form th:if="${user.accountStatus.name() == 'PENDING'}"
                               th:action="@{/admin/providers/{id}/approve(id=${user.id})}"
                               method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <button class="btn btn-sm btn-success">Approve</button>
                         </form>
-                        <form th:if="${user.accountStatus.name() != 'SUSPENDED'}"
+
+                        <form th:if="${user.accountStatus.name() == 'ACTIVE' and !user.person.isDeleted}"
                               th:action="@{/admin/providers/{id}/suspend(id=${user.id})}"
                               method="post"
                               onsubmit="return confirm('Suspend this provider?')">
-                            <button class="btn btn-sm btn-outline-danger">Suspend</button>
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button class="btn btn-sm btn-outline-warning">Suspend</button>
+                        </form>
+
+                        <form th:if="${user.accountStatus.name() == 'SUSPENDED' and !user.person.isDeleted}"
+                              th:action="@{/admin/providers/{id}/approve(id=${user.id})}"
+                              method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button class="btn btn-sm btn-outline-success">Reactivate</button>
+                        </form>
+
+                        <form th:if="${user.person.isDeleted}"
+                              th:action="@{/admin/providers/{id}/approve(id=${user.id})}"
+                              method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button class="btn btn-sm btn-outline-secondary">Restore</button>
+                        </form>
+
+                        <form th:if="${!user.person.isDeleted}"
+                              th:action="@{/admin/providers/{id}/delete(id=${user.id})}"
+                              method="post"
+                              onsubmit="return confirm('Delete this provider?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
                         </form>
                     </div>
                 </td>
@@ -60,7 +90,14 @@
             </tbody>
         </table>
     </div>
-
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+    </script>
 </div>
 </body>
 </html>

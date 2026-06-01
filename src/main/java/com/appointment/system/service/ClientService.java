@@ -21,6 +21,7 @@ public class ClientService {
     private final UserRepository userRepository;
 
     public ClientProfileResponse getProfile(Long personId) {
+        log.debug("Retrieving profile for client {}", personId);
         Client client = clientRepository.findById(personId).orElseThrow(() -> new EntityNotFoundException("Client not" +
                 " found"));
         return toResponse(client);
@@ -34,6 +35,7 @@ public class ClientService {
         client.setLastName(request.getLastName());
         client.setPhoneNr(request.getPhoneNr());
         client.setNotes(request.getNotes());
+        log.info("Client profile updated: id={}", personId);
     }
 
     private ClientProfileResponse toResponse(Client client) {

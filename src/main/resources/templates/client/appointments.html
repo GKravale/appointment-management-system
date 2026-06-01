@@ -160,11 +160,37 @@
                th:if="${#lists.isEmpty(appointments.?[status.name() == 'COMPLETED'
                         or status.name() == 'CANCELLED' or status.name() == 'DECLINED'
                         or status.name() == 'NO_SHOW'])}"
-                No past appointments.
+               No past appointments.
             </p>
         </div>
 
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = Array.from(document.querySelectorAll('tbody tr'));
+            const pageSize = 20;
+            let shown = pageSize;
+
+            rows.forEach((row, i) => {
+                if (i >= pageSize) row.style.display = 'none';
+            });
+
+            if (rows.length > pageSize) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-secondary mt-3';
+                btn.textContent = 'Show 20 more (' + (rows.length - shown) + ' remaining)';
+                btn.addEventListener('click', function () {
+                    const next = Math.min(shown + pageSize, rows.length);
+                    for (let i = shown; i < next; i++) rows[i].style.display = '';
+                    shown = next;
+                    const remaining = rows.length - shown;
+                    if (remaining <= 0) btn.remove();
+                    else btn.textContent = 'Show 20 more (' + remaining + ' remaining)';
+                });
+                document.querySelector('.table-responsive').after(btn);
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

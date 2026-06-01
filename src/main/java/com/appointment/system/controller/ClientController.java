@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,39 +30,34 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Controller
 @RequestMapping("/client")
 @RequiredArgsConstructor
 public class ClientController {
 
     private final AppointmentService appointmentService;
-
     private final ProviderServiceOfferingRepository providerServiceOfferingRepository;
-
     private final ClientService clientService;
-
     private final UserRepository userRepository;
-
     private final NotificationService notificationService;
-
     private final EmailService emailService;
-
     private final UserService userService;
+    private final PostService postService;
 
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails user, Model model) {
         model.addAttribute("username", user.getUsername());
         model.addAttribute("appointments", appointmentService.getClientAppointments(user.getPersonId()));
+        model.addAttribute("feedPosts", postService.getAllRecentPosts(20));
         return "client/dashboard";
     }
 
     @GetMapping("/book")
-    public String bookingPage(@RequestParam Long providerId, @RequestParam Long serviceId,
-                              @AuthenticationPrincipal CustomUserDetails user, Model model) {
+    public String bookingPage(@RequestParam Long providerId, @RequestParam Long serviceId, Model model) {
         ProviderServiceOfferingResponse service =
                 ProviderServiceOfferingResponse.from(providerServiceOfferingRepository.findById(serviceId)
                         .orElseThrow(() -> new EntityNotFoundException("Service not found")));
-
         model.addAttribute("service", service);
         model.addAttribute("providerId", providerId);
         model.addAttribute("bookRequest", new BookAppointmentRequest());
@@ -73,7 +69,6 @@ public class ClientController {
     public ResponseEntity<List<Map<String, Object>>> getSlots(@RequestParam Long serviceId,
                                                               @RequestParam @DateTimeFormat(iso =
                                                                       DateTimeFormat.ISO.DATE) LocalDate date) {
-
         final String availableTitle = "Available";
         final String primaryColor = "#0d6efd";
         final long slotDurationMinutes = 30L;
@@ -100,11 +95,15 @@ public class ClientController {
     @PostMapping("/book")
     public String confirmBooking(@AuthenticationPrincipal CustomUserDetails user, @Valid @ModelAttribute("bookRequest"
     ) BookAppointmentRequest request, RedirectAttributes redirectAttributes) {
-
-        appointmentService.book(user.getPersonId(), request);
-        redirectAttributes.addFlashAttribute("successMessage",
-                "Appointment requested successfully! You will receive a confirmation email.");
-        return "redirect:/client/dashboard";
+        try {
+            appointmentService.book(user.getPersonId(), request);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Appointment requested successfully! You will receive a confirmation email.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            log.warn("Client {} failed to book appointment: {}", user.getPersonId(), e.getMessage());
+        }
+        return "redirect:/client/appointments";
     }
 
     @GetMapping("/appointments")
@@ -133,36 +132,32 @@ public class ClientController {
                                         "updateRequest") UpdateClientProfileRequest request,
                                 BindingResult bindingResult, Model model,
                                 RedirectAttributes redirectAttributes) {
-
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", clientService.getProfile(user.getPersonId()));
             return "client/profile";
         }
-
         clientService.updateProfile(user.getPersonId(), request);
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully");
+        log.info("Client {} updated profile", user.getUsername());
         return "redirect:/client/profile";
     }
 
     @PostMapping("/delete-account")
     public String deleteAccount(@AuthenticationPrincipal CustomUserDetails currentUser, HttpServletRequest request,
-                                HttpServletResponse response) throws Exception {
+                                HttpServletResponse response) {
         userService.deleteAccount(currentUser.getId());
         new org.springframework.security.web.authentication.logout
                 .SecurityContextLogoutHandler()
                 .logout(request, response, null);
+        log.info("Client {} deleted account", currentUser.getUsername());
         return "redirect:/auth/login?deleted=true";
     }
 
     @GetMapping("/request")
-    public String requestPage(
-            @RequestParam Long providerId,
-            @RequestParam Long serviceId,
-            Model model) {
+    public String requestPage(@RequestParam Long providerId, @RequestParam Long serviceId, Model model) {
         ProviderServiceOfferingResponse service =
-                ProviderServiceOfferingResponse.from(
-                        providerServiceOfferingRepository.findById(serviceId)
-                                .orElseThrow(() -> new EntityNotFoundException("Service not found")));
+                ProviderServiceOfferingResponse.from(providerServiceOfferingRepository.findById(serviceId)
+                        .orElseThrow(() -> new EntityNotFoundException("Service not found")));
         model.addAttribute("service", service);
         model.addAttribute("providerId", providerId);
         return "client/request";
@@ -174,7 +169,6 @@ public class ClientController {
                                 @RequestParam(required = false) String description,
                                 @RequestParam(required = false) String contactPreference,
                                 RedirectAttributes redirectAttributes) {
-
         ProviderServiceOffering pso = providerServiceOfferingRepository
                 .findById(serviceId)
                 .orElseThrow(() -> new EntityNotFoundException("Service not found"));
@@ -207,6 +201,7 @@ public class ClientController {
         redirectAttributes.addFlashAttribute("successMessage",
                 "Your consultation request has been sent. "
                         + "The provider will contact you directly.");
+        log.info("Consultation request sent to provider {} for service {}", providerId, serviceId);
         return "redirect:/client/dashboard";
     }
 
@@ -217,7 +212,6 @@ public class ClientController {
                                                                          DateTimeFormat.ISO.DATE) LocalDate from,
                                                                  @RequestParam @DateTimeFormat(iso =
                                                                          DateTimeFormat.ISO.DATE) LocalDate to) {
-
         Map<String, Boolean> result = new java.util.LinkedHashMap<>();
         LocalDate current = from;
         while (!current.isAfter(to)) {
@@ -229,15 +223,15 @@ public class ClientController {
     }
 
     @PostMapping("/appointments/{id}/cancel")
-    public String cancelAppointment(@PathVariable Long id,
-                                    @AuthenticationPrincipal CustomUserDetails user,
+    public String cancelAppointment(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user,
                                     RedirectAttributes redirectAttributes) {
         try {
             appointmentService.cancelByClient(id, user.getPersonId());
             redirectAttributes.addFlashAttribute("successMessage", "Appointment cancelled");
-        } catch (IllegalStateException e) {
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
+        log.info("Client {} cancelled appointment {}", user.getUsername(), id);
         return "redirect:/client/appointments";
     }
 }

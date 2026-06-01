@@ -23,6 +23,9 @@ public class Provider extends Person {
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
+    @Column(name = "profile_picture_path")
+    private String profilePicturePath;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 

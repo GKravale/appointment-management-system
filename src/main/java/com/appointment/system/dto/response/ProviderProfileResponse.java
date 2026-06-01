@@ -16,6 +16,7 @@ public class ProviderProfileResponse {
     private String phoneNr;
     private String location;
     private String bio;
+    private String profilePicturePath;
     private Boolean isActive;
     private Integer cancellationHoursLimit;
     private List<ProviderServiceOfferingResponse> serviceOfferings;

@@ -23,6 +23,7 @@ public class EmailService {
 
     @Async
     public void sendAppointmentRequested(String toEmail, String clientName, String providerName, String serviceName, String startTime) {
+        log.debug("Sending appointment requested email to {}", toEmail);
         send(toEmail,
                 "Appointment request received",
                 "Hi " + clientName + ",\n\n" +
@@ -36,6 +37,7 @@ public class EmailService {
 
     @Async
     public void sendAppointmentConfirmed(String toEmail, String clientName, String providerName, String serviceName, String startTime) {
+        log.debug("Sending appointment confirmed email to {}", toEmail);
         send(toEmail,
                 "Appointment confirmed",
                 "Hi " + clientName + ",\n\n" +
@@ -48,6 +50,7 @@ public class EmailService {
 
     @Async
     public void sendAppointmentDeclined(String toEmail, String clientName, String providerName, String serviceName, String startTime) {
+        log.debug("Sending appointment declined email to {}", toEmail);
         send(toEmail,
                 "Appointment request declined",
                 "Hi " + clientName + ",\n\n" +
@@ -62,6 +65,7 @@ public class EmailService {
     public void sendAppointmentCancelledByClient(String toEmail, String providerName,
                                                  String clientName, String serviceName,
                                                  String startTime) {
+        log.debug("Sending appointment cancelled (by client) email to {}", toEmail);
         send(toEmail,
                 "Appointment cancelled — " + serviceName,
                 "Hi " + providerName + ",\n\n" +
@@ -75,6 +79,7 @@ public class EmailService {
     public void sendAppointmentCancelledByProvider(String toEmail, String clientName,
                                                    String providerName, String serviceName,
                                                    String startTime) {
+        log.debug("Sending appointment cancelled (by provider) email to {}", toEmail);
         send(toEmail,
                 "Appointment cancelled — " + serviceName,
                 "Hi " + clientName + ",\n\n" +
@@ -87,6 +92,7 @@ public class EmailService {
 
     @Async
     public void sendNewBookingRequestToProvider(String toEmail, String providerName, String clientName, String serviceName, String startTime) {
+        log.debug("Sending new booking request email to {}", toEmail);
         send(toEmail,
                 "New appointment request",
                 "Hi " + providerName + ",\n\n" +
@@ -98,7 +104,10 @@ public class EmailService {
     }
 
     @Async
-    public void sendConsultationRequest(String toEmail, String providerName, String clientName, String serviceName, String preferredDates, String description, String contactPreference, String clientEmail) {
+    public void sendConsultationRequest(String toEmail, String providerName, String clientName, String serviceName,
+                                        String preferredDates, String description, String contactPreference,
+                                        String clientEmail) {
+        log.debug("Sending consultation request email to {}", toEmail);
         send(toEmail,
                 "New consultation request — " + serviceName,
                 "Hi " + providerName + ",\n\n" +
@@ -113,7 +122,21 @@ public class EmailService {
     }
 
     @Async
+    public void sendEmailVerification(String toEmail, String username, String token) {
+        log.debug("Sending email verification to {}", toEmail);
+        String verifyLink = baseUrl + "/auth/verify-email?token=" + token;
+        send(toEmail,
+                "Verify your email address",
+                "Hi " + username + ",\n\n" +
+                        "Thank you for registering! Please verify your email address by clicking the link below:\n\n" +
+                        verifyLink + "\n\n" +
+                        "This link expires in 24 hours.\n\n" +
+                        "If you did not create an account, please ignore this email.");
+    }
+
+    @Async
     public void sendPasswordResetEmail(String toEmail, String username, String token) {
+        log.debug("Sending password reset email to {}", toEmail);
         String resetLink = baseUrl + "/auth/reset-password?token=" + token;
         send(toEmail,
                 "Password reset request",
@@ -134,5 +157,6 @@ public class EmailService {
         message.setSubject(subject);
         message.setText(body);
         mailSender.send(message);
+        log.info("Email sent: to={}, subject={}", to, subject);
     }
 }
