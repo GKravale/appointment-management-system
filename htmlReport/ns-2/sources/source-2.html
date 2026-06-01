@@ -1,0 +1,235 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SecurityConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.config</a>
+</div>
+
+<h1>Coverage Summary for Class: SecurityConfig (com.appointment.system.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SecurityConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72%
+  </span>
+  <span class="absValue">
+    (18/25)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SecurityConfig$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">SecurityConfig$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">SecurityConfig$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+  <tr>
+    <td class="name">SecurityConfig$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (8/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69.2%
+  </span>
+  <span class="absValue">
+    (18/26)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.config;
+&nbsp;
+&nbsp;import com.appointment.system.security.CustomUserDetails;
+&nbsp;import com.appointment.system.security.CustomUserDetailsService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.security.authentication.AuthenticationManager;
+&nbsp;import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+&nbsp;import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+&nbsp;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+&nbsp;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.security.web.SecurityFilterChain;
+&nbsp;import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+&nbsp;
+&nbsp;@Configuration
+&nbsp;@EnableWebSecurity
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class SecurityConfig {
+&nbsp;
+&nbsp;    private final CustomUserDetailsService userDetailsService;
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public PasswordEncoder passwordEncoder() {
+<b class="fc">&nbsp;        return new BCryptPasswordEncoder();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public DaoAuthenticationProvider authenticationProvider() {
+<b class="fc">&nbsp;        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);</b>
+<b class="fc">&nbsp;        provider.setPasswordEncoder(passwordEncoder());</b>
+<b class="fc">&nbsp;        return provider;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+<b class="fc">&nbsp;        return config.getAuthenticationManager();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<b class="fc">&nbsp;        http.authenticationProvider(authenticationProvider()).authorizeHttpRequests(auth</b>
+<b class="fc">&nbsp;                -&gt; auth.requestMatchers(&quot;/&quot;, &quot;/auth/login&quot;, &quot;/auth/register&quot;, &quot;/auth/forgot-password&quot;,</b>
+&nbsp;                &quot;/auth/reset-password&quot;, &quot;/providers&quot;, &quot;/providers/**&quot;, &quot;/privacy&quot;, &quot;/terms&quot;, &quot;/css/**&quot;,
+&nbsp;                &quot;/js/**&quot;, &quot;/uploads/**&quot;, &quot;/webjars/**&quot;
+<b class="fc">&nbsp;        ).permitAll().requestMatchers(&quot;/admin/**&quot;).hasAuthority(</b>
+<b class="fc">&nbsp;                &quot;ROLE_ADMIN&quot;).requestMatchers(</b>
+<b class="fc">&nbsp;                &quot;/provider/**&quot;).hasAuthority(&quot;ROLE_PROVIDER&quot;).requestMatchers(&quot;/client/**&quot;).hasAuthority(</b>
+<b class="fc">&nbsp;                &quot;ROLE_CLIENT&quot;).anyRequest().authenticated()).formLogin(form -&gt;</b>
+<b class="fc">&nbsp;                form.loginPage(&quot;/auth&quot; + &quot;/login&quot;).usernameParameter(&quot;username&quot;).passwordParameter(&quot;password&quot;)</b>
+<b class="fc">&nbsp;                        .successHandler(roleBasedSuccessHandler()).failureUrl(&quot;/auth&quot; + &quot;/login?error=true&quot;)</b>
+<b class="fc">&nbsp;                        .permitAll()).logout(logout -&gt; logout.logoutUrl(&quot;/auth/logout&quot;)</b>
+<b class="fc">&nbsp;                .logoutSuccessUrl(&quot;/auth/login?logout=true&quot;).invalidateHttpSession(true).deleteCookies(&quot;JSESSIONID&quot;)</b>
+<b class="fc">&nbsp;                .permitAll()).sessionManagement(session -&gt; session.maximumSessions(1));</b>
+&nbsp;
+<b class="fc">&nbsp;        return http.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public AuthenticationSuccessHandler roleBasedSuccessHandler() {
+<b class="fc">&nbsp;        return (request, response, authentication) -&gt; {</b>
+<b class="nc">&nbsp;            Object principal = authentication.getPrincipal();</b>
+<b class="nc">&nbsp;            if (!(principal instanceof CustomUserDetails user)) {</b>
+<b class="nc">&nbsp;                response.sendRedirect(&quot;/&quot;);</b>
+&nbsp;                return;
+&nbsp;            }
+<b class="nc">&nbsp;            switch (user.getRole()) {</b>
+<b class="nc">&nbsp;                case ROLE_PROVIDER -&gt; response.sendRedirect(&quot;/provider/dashboard&quot;);</b>
+<b class="nc">&nbsp;                case ROLE_CLIENT -&gt; response.sendRedirect(&quot;/client/dashboard&quot;);</b>
+<b class="nc">&nbsp;                case ROLE_ADMIN -&gt; response.sendRedirect(&quot;/admin/dashboard&quot;);</b>
+&nbsp;            }
+&nbsp;        };
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

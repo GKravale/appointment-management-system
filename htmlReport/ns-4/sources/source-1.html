@@ -1,0 +1,162 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ProviderServiceOfferingResponse</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.dto.response</a>
+</div>
+
+<h1>Coverage Summary for Class: ProviderServiceOfferingResponse (com.appointment.system.dto.response)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProviderServiceOfferingResponse</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.2%
+  </span>
+  <span class="absValue">
+    (15/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.dto.response;
+&nbsp;
+&nbsp;import com.appointment.system.entity.ProviderServiceOffering;
+&nbsp;import com.appointment.system.enums.BookingType;
+&nbsp;import com.appointment.system.enums.ServiceCategory;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import lombok.Setter;
+&nbsp;
+&nbsp;@Getter
+&nbsp;@Setter
+&nbsp;@NoArgsConstructor
+&nbsp;public class ProviderServiceOfferingResponse {
+&nbsp;    private Long id;
+&nbsp;    private Long serviceOfferingId;
+&nbsp;    private String title;
+&nbsp;    private String description;
+&nbsp;    private ServiceCategory category;
+&nbsp;    private int effectiveDuration;
+&nbsp;    private String effectivePrice;
+&nbsp;    private Boolean isActive;
+&nbsp;    private Integer bufferMinutes = 0;
+&nbsp;    private BookingType bookingType;
+&nbsp;
+&nbsp;    public static ProviderServiceOfferingResponse from(ProviderServiceOffering providerServiceOffering) {
+<b class="fc">&nbsp;        ProviderServiceOfferingResponse offeringResponse = new ProviderServiceOfferingResponse();</b>
+&nbsp;
+<b class="fc">&nbsp;        offeringResponse.setId(providerServiceOffering.getId());</b>
+<b class="fc">&nbsp;        offeringResponse.setServiceOfferingId(providerServiceOffering.getServiceOffering().getId());</b>
+<b class="fc">&nbsp;        offeringResponse.setTitle(providerServiceOffering.getServiceOffering().getTitle());</b>
+<b class="fc">&nbsp;        offeringResponse.setDescription(providerServiceOffering.getServiceOffering().getDescription());</b>
+<b class="fc">&nbsp;        offeringResponse.setCategory(providerServiceOffering.getServiceOffering().getCategory());</b>
+<b class="pc">&nbsp;        offeringResponse.setEffectiveDuration(providerServiceOffering.getDurationOverride() != null ?</b>
+<b class="nc">&nbsp;                providerServiceOffering.getDurationOverride() :</b>
+<b class="fc">&nbsp;                providerServiceOffering.getServiceOffering().getDefaultDuration());</b>
+<b class="pc">&nbsp;        offeringResponse.setEffectivePrice(providerServiceOffering.getPriceOverride() != null ?</b>
+<b class="nc">&nbsp;                providerServiceOffering.getPriceOverride() :</b>
+<b class="fc">&nbsp;                providerServiceOffering.getServiceOffering().getPriceEstimate());</b>
+<b class="fc">&nbsp;        offeringResponse.setIsActive(providerServiceOffering.getIsActive());</b>
+<b class="pc">&nbsp;        offeringResponse.setBufferMinutes(providerServiceOffering.getBufferMinutes() != null ?</b>
+<b class="fc">&nbsp;                providerServiceOffering.getBufferMinutes() : 0);</b>
+<b class="fc">&nbsp;        offeringResponse.setBookingType(providerServiceOffering.getServiceOffering().getBookingType());</b>
+&nbsp;
+<b class="fc">&nbsp;        return offeringResponse;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

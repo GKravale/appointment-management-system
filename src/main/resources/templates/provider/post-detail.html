@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Post</title></head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-body">
+                    <p th:if="${post.contentText != null}"
+                       th:text="${post.contentText}"
+                       class="mb-4 fs-5"></p>
+
+                    <div th:each="pm : ${post.postMediaList}" class="mb-3">
+                        <img th:if="${pm.mediaAsset.mediaType.name() == 'IMAGE'}"
+                             th:src="@{/{p}(p=${pm.mediaAsset.filePath})}"
+                             th:alt="${pm.mediaAsset.altText}"
+                             class="img-fluid rounded w-100"/>
+                        <video th:if="${pm.mediaAsset.mediaType.name() == 'VIDEO'}"
+                               th:src="@{/{p}(p=${pm.mediaAsset.filePath})}"
+                               class="w-100 rounded" controls></video>
+                    </div>
+
+                    <div class="d-flex justify-content-between
+                                align-items-center mt-3">
+                        <small class="text-muted"
+                               th:text="${#temporals.format(post.createdAt,
+                                        'dd MMM yyyy HH:mm')}"></small>
+                        <a th:href="@{/provider/posts}"
+                           class="btn btn-outline-secondary btn-sm">
+                            Back to posts
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>My Posts</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">My posts</h2>
+        <a th:href="@{/provider/portfolio}"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-images me-1"></i>Portfolio
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h6 class="mb-0">New post</h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/provider/posts/create}"
+                  method="post" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <textarea name="contentText"
+                              class="form-control" rows="3"
+                              placeholder="Share your work, ideas or updates..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Upload new images or videos
+                        <small class="text-muted">(optional)</small>
+                    </label>
+                    <input type="file" name="files"
+                           class="form-control"
+                           accept="image/*,video/*" multiple
+                           aria-label="Upload media files"/>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" name="addToPortfolio"
+                           class="form-check-input"
+                           id="addToPortfolio" value="true"/>
+                    <label class="form-check-label" for="addToPortfolio">
+                        Also add uploaded images to my portfolio
+                    </label>
+                </div>
+
+                <div class="mb-3"
+                     th:unless="${#lists.isEmpty(portfolioAssets)}">
+                    <label class="form-label">
+                        Or attach from portfolio
+                        <small class="text-muted">(optional)</small>
+                    </label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div th:each="asset : ${portfolioAssets}">
+                            <input class="d-none" type="checkbox"
+                                   name="portfolioAssetIds"
+                                   th:value="${asset.id}"
+                                   th:id="'pa-' + ${asset.id}"/>
+                            <label th:for="'pa-' + ${asset.id}"
+                                   class="portfolio-pick">
+                                <img th:src="@{/{p}(p=${asset.filePath})}"
+                                     th:alt="${asset.altText}"
+                                     style="width:64px;height:64px;
+                                            object-fit:cover;
+                                            border-radius:6px;
+                                            border:2px solid transparent;
+                                            cursor:pointer;"
+                                     class="portfolio-pick-img"/>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Publish
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(posts)}"
+         class="text-center text-muted py-4">
+        <i class="bi bi-file-post fs-2 d-block mb-2"></i>
+        <p>No posts yet.</p>
+    </div>
+
+    <div th:each="post : ${posts}" class="card mb-3">
+        <div class="card-body">
+            <p th:if="${post.contentText != null and !post.contentText.isEmpty()}"
+               th:text="${post.contentText}" class="mb-3"></p>
+
+            <div th:unless="${#lists.isEmpty(post.postMediaList)}"
+                 class="row g-2 mb-3">
+                <div th:each="pm, stat : ${post.postMediaList}"
+                     th:if="${stat.index < 3}"
+                     class="col-4">
+                    <img th:if="${pm.mediaAsset.mediaType.name() == 'IMAGE'}"
+                         th:src="@{/{p}(p=${pm.mediaAsset.filePath})}"
+                         th:alt="${pm.mediaAsset.altText}"
+                         class="img-fluid rounded"
+                         style="height:120px;width:100%;object-fit:cover;"/>
+                    <video th:if="${pm.mediaAsset.mediaType.name() == 'VIDEO'}"
+                           th:src="@{/{p}(p=${pm.mediaAsset.filePath})}"
+                           class="img-fluid rounded"
+                           style="height:120px;width:100%;object-fit:cover;"
+                           controls></video>
+                    <div th:if="${stat.index == 2 and
+                                  #lists.size(post.postMediaList) > 3}"
+                         class="position-relative">
+                        <div class="position-absolute top-0 start-0 w-100 h-100
+                                    d-flex align-items-center justify-content-center
+                                    bg-dark bg-opacity-50 rounded text-white fw-bold">
+                            +<span th:text="${#lists.size(post.postMediaList) - 3}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <small class="text-muted"
+                           th:text="${#temporals.format(post.createdAt,
+                                    'dd MMM yyyy HH:mm')}"></small>
+                    <a th:href="@{/provider/posts/{id}(id=${post.id})}"
+                       class="btn btn-sm btn-link ms-2 p-0">
+                        View
+                    </a>
+                </div>
+                <form th:action="@{/provider/posts/delete/{id}(id=${post.id})}"
+                      method="post">
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('Delete this post?')"
+                            aria-label="Delete post">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<th:block layout:fragment="scripts">
+    <script>
+        document.querySelectorAll('.portfolio-pick input[type="checkbox"]')
+            .forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    const img = document.querySelector(
+                        'label[for="' + this.id + '"] img');
+                    if (!img) return;
+                    if (this.checked) {
+                        img.style.borderColor = '#61006e';
+                        img.style.borderWidth = '3px';
+                        img.style.opacity = '1';
+                    } else {
+                        img.style.borderColor = 'transparent';
+                        img.style.opacity = '0.7';
+                    }
+                });
+                const img = document.querySelector(
+                    'label[for="' + cb.id + '"] img');
+                if (img) img.style.opacity = '0.7';
+            });
+    </script>
+</th:block>
+</body>
+</html>

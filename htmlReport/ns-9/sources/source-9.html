@@ -1,0 +1,231 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ServiceOfferingService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ServiceOfferingService (com.appointment.system.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ServiceOfferingService</td>
+<td class="coverageStat">
+  <span class="percent">
+    57.1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45.2%
+  </span>
+  <span class="absValue">
+    (28/62)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    29.3%
+  </span>
+  <span class="absValue">
+    (12/41)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ServiceOfferingService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    57.1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45.2%
+  </span>
+  <span class="absValue">
+    (28/62)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    29.3%
+  </span>
+  <span class="absValue">
+    (12/41)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.service;
+&nbsp;
+&nbsp;import com.appointment.system.dto.request.CreateServiceOfferingRequest;
+&nbsp;import com.appointment.system.dto.response.ProviderServiceOfferingResponse;
+&nbsp;import com.appointment.system.entity.Provider;
+&nbsp;import com.appointment.system.entity.ProviderServiceOffering;
+&nbsp;import com.appointment.system.entity.ServiceOffering;
+&nbsp;import com.appointment.system.enums.BookingType;
+&nbsp;import com.appointment.system.enums.ServiceCategory;
+&nbsp;import com.appointment.system.repository.ProviderRepository;
+&nbsp;import com.appointment.system.repository.ProviderServiceOfferingRepository;
+&nbsp;import com.appointment.system.repository.ServiceOfferingRepository;
+&nbsp;import jakarta.persistence.EntityNotFoundException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;public class ServiceOfferingService {
+&nbsp;
+&nbsp;    private final ServiceOfferingRepository serviceOfferingRepository;
+&nbsp;    private final ProviderServiceOfferingRepository providerServiceOfferingRepository;
+&nbsp;    private final ProviderRepository providerRepository;
+&nbsp;
+&nbsp;    public List&lt;ProviderServiceOfferingResponse&gt; getProviderOfferings(Long personId) {
+<b class="fc">&nbsp;        Provider provider = providerRepository.findById(personId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider not found&quot;));</b>
+<b class="fc">&nbsp;        return providerServiceOfferingRepository</b>
+<b class="fc">&nbsp;                .findByProviderAndIsActiveTrueAndIsDeletedFalse(provider)</b>
+<b class="fc">&nbsp;                .stream()</b>
+<b class="fc">&nbsp;                .map(ProviderServiceOfferingResponse::from)</b>
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;ServiceOffering&gt; getAllBaseOfferings() {
+<b class="pc">&nbsp;        return serviceOfferingRepository.findByIsActiveTrueAndIsDeletedFalse();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;ServiceCategory&gt; getAllCategories() {
+<b class="pc">&nbsp;        return List.of(ServiceCategory.values());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void createAndAssign(Long personId, CreateServiceOfferingRequest request) {
+<b class="nc">&nbsp;        Provider provider = providerRepository.findById(personId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider not found&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        ServiceOffering offering = new ServiceOffering(</b>
+<b class="nc">&nbsp;                request.getTitle(),</b>
+<b class="fc">&nbsp;                request.getDescription(),</b>
+<b class="nc">&nbsp;                request.getDefaultDuration(),</b>
+<b class="nc">&nbsp;                request.getPriceEstimate(),</b>
+<b class="nc">&nbsp;                request.getCategory()</b>
+&nbsp;        );
+<b class="nc">&nbsp;        offering.setBookingType(request.getBookingType() != null ? request.getBookingType() : BookingType.SLOT_BASED);</b>
+<b class="nc">&nbsp;        serviceOfferingRepository.save(offering);</b>
+&nbsp;
+<b class="nc">&nbsp;        ProviderServiceOffering providerOffering = new ProviderServiceOffering(provider, offering);</b>
+<b class="nc">&nbsp;        providerOffering.setBufferMinutes(request.getBufferMinutes());</b>
+<b class="nc">&nbsp;        providerServiceOfferingRepository.save(providerOffering);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void update(Long providerServiceOfferingId, Long personId, CreateServiceOfferingRequest request) {
+<b class="nc">&nbsp;        ProviderServiceOffering offering = providerServiceOfferingRepository.findById(providerServiceOfferingId)</b>
+<b class="nc">&nbsp;                        .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Service not found&quot;));</b>
+<b class="nc">&nbsp;        if (!offering.getProvider().getId().equals(personId)) {</b>
+<b class="nc">&nbsp;            throw new SecurityException(&quot;Not authorized&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        offering.getServiceOffering().setTitle(request.getTitle());</b>
+<b class="nc">&nbsp;        offering.getServiceOffering().setDescription(request.getDescription());</b>
+<b class="nc">&nbsp;        offering.getServiceOffering().setDefaultDuration(request.getDefaultDuration());</b>
+<b class="nc">&nbsp;        offering.getServiceOffering().setPriceEstimate(request.getPriceEstimate());</b>
+<b class="nc">&nbsp;        offering.getServiceOffering().setCategory(request.getCategory());</b>
+<b class="nc">&nbsp;        offering.getServiceOffering().setBookingType(request.getBookingType() != null ? request.getBookingType() :</b>
+<b class="nc">&nbsp;                BookingType.SLOT_BASED);</b>
+<b class="nc">&nbsp;        offering.setBufferMinutes(request.getBufferMinutes());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void deactivate(Long providerServiceOfferingId, Long personId) {
+<b class="nc">&nbsp;        ProviderServiceOffering offering = providerServiceOfferingRepository</b>
+<b class="nc">&nbsp;                .findById(providerServiceOfferingId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Service not found&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!offering.getProvider().getId().equals(personId)) {</b>
+<b class="nc">&nbsp;            throw new SecurityException(&quot;Not authorized&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        offering.setIsActive(false);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

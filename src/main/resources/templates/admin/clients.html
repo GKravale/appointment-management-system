@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Clients</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Clients</h2>
+        <a th:href="@{/admin/dashboard}"
+           class="btn btn-sm btn-outline-secondary">Back</a>
+    </div>
+
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control"
+               placeholder="Search by name, email, or username..."/>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Registered</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${clients}">
+                <td th:text="${user.person.firstName + ' ' +
+                                  user.person.lastName}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${user.username}"></td>
+                <td>
+                        <span class="badge"
+                              th:classappend="${user.accountStatus.name()
+                                              == 'ACTIVE'} ? 'bg-success'
+                                              : 'bg-danger'"
+                              th:text="${user.accountStatus}"></span>
+                </td>
+                <td th:text="${#temporals.format(user.createdAt,
+                                 'dd MMM yyyy')}"></td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <form th:if="${user.accountStatus.name() != 'SUSPENDED'}"
+                              th:action="@{/admin/clients/{id}/deactivate(id=${user.id})}"
+                              method="post"
+                              onsubmit="return confirm('Deactivate this client?')">
+                            <button class="btn btn-sm btn-outline-warning">Deactivate</button>
+                        </form>
+                        <form th:if="${user.accountStatus.name() == 'SUSPENDED'}"
+                              th:action="@{/admin/clients/{id}/reactivate(id=${user.id})}"
+                              method="post">
+                            <button class="btn btn-sm btn-outline-success">Reactivate</button>
+                        </form>
+                        <form th:if="${user.person.isDeleted == false}"
+                              th:action="@{/admin/clients/{id}/delete(id=${user.id})}"
+                              method="post"
+                              onsubmit="return confirm('Delete this client?')">
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

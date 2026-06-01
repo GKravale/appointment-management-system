@@ -1,0 +1,181 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ServiceOffering</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.entity</a>
+</div>
+
+<h1>Coverage Summary for Class: ServiceOffering (com.appointment.system.entity)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ServiceOffering</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ServiceOffering$HibernateInstantiator</td>
+  </tr>
+  <tr>
+    <td class="name">ServiceOffering$HibernateProxy</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.entity;
+&nbsp;
+&nbsp;import com.appointment.system.enums.BookingType;
+&nbsp;import com.appointment.system.enums.ServiceCategory;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import jakarta.validation.constraints.*;
+&nbsp;import lombok.*;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Getter
+&nbsp;@Setter
+&nbsp;@NoArgsConstructor
+&nbsp;@ToString
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;service_offering&quot;)
+&nbsp;public class ServiceOffering {
+&nbsp;
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;    private Long id;
+&nbsp;
+&nbsp;    @NotNull
+&nbsp;    @Size(min = 2, max = 100)
+&nbsp;    @Column(name = &quot;title&quot;, nullable = false)
+&nbsp;    private String title;
+&nbsp;
+&nbsp;    @Column(name = &quot;description&quot;, columnDefinition = &quot;TEXT&quot;)
+&nbsp;    private String description;
+&nbsp;
+&nbsp;    @Column(name = &quot;default_duration&quot;, nullable = false)
+&nbsp;    private int defaultDuration;
+&nbsp;
+&nbsp;    @Column(name = &quot;price_estimate&quot;)
+&nbsp;    private String priceEstimate;
+&nbsp;
+&nbsp;    @Enumerated(EnumType.STRING)
+&nbsp;    @Column(name = &quot;category&quot;)
+&nbsp;    private ServiceCategory category;
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;is_active&quot;, nullable = false)</b>
+<b class="fc">&nbsp;    private Boolean isActive = true;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Column(name = &quot;is_deleted&quot;, nullable = false)</b>
+<b class="fc">&nbsp;    private Boolean isDeleted = false;</b>
+&nbsp;
+<b class="fc">&nbsp;    @OneToMany(mappedBy = &quot;serviceOffering&quot;, cascade = CascadeType.ALL)</b>
+&nbsp;    @ToString.Exclude
+&nbsp;    private List&lt;ProviderServiceOffering&gt; providerServiceOfferings = new ArrayList&lt;&gt;();
+&nbsp;
+<b class="fc">&nbsp;    @Enumerated(EnumType.STRING)</b>
+&nbsp;    @Column(name = &quot;booking_type&quot;, nullable = false)
+&nbsp;    private BookingType bookingType = BookingType.SLOT_BASED;
+&nbsp;
+&nbsp;    public ServiceOffering(String title, String description, int defaultDuration, String priceEstimate,
+<b class="fc">&nbsp;                           ServiceCategory category) {</b>
+<b class="fc">&nbsp;        this.title = title;</b>
+<b class="fc">&nbsp;        this.description = description;</b>
+<b class="fc">&nbsp;        this.defaultDuration = defaultDuration;</b>
+<b class="fc">&nbsp;        this.priceEstimate = priceEstimate;</b>
+<b class="fc">&nbsp;        this.category = category;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

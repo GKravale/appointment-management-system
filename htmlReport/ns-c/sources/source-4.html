@@ -1,0 +1,100 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TimeBlockRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: TimeBlockRepository (com.appointment.system.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">TimeBlockRepository$MockitoMock$B3hsWiqU</td>
+  </tr>
+  <tr>
+    <td class="name">TimeBlockRepository$MockitoMock$B3hsWiqU$auxiliary$0lY9VaLl</td>
+  </tr>
+  <tr>
+    <td class="name">TimeBlockRepository$MockitoMock$B3hsWiqU$auxiliary$r3qoAuex</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.repository;
+&nbsp;
+&nbsp;import com.appointment.system.entity.Provider;
+&nbsp;import com.appointment.system.entity.TimeBlock;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;public interface TimeBlockRepository extends JpaRepository&lt;TimeBlock, Long&gt; {
+&nbsp;
+&nbsp;    List&lt;TimeBlock&gt; findByProvider(Provider provider);
+&nbsp;
+&nbsp;    List&lt;TimeBlock&gt; findByProviderAndStartDateTimeBetween(Provider provider, LocalDateTime from, LocalDateTime to);
+&nbsp;
+&nbsp;    @Query(&quot;SELECT tb FROM TimeBlock tb WHERE tb.provider = :provider AND tb.startDateTime &lt; :dayEnd AND tb&quot; +
+&nbsp;            &quot;.endDateTime &gt; :dayStart&quot;)
+&nbsp;    List&lt;TimeBlock&gt; findByProviderOverlappingDay(@Param(&quot;provider&quot;) Provider provider,
+&nbsp;                                                 @Param(&quot;dayStart&quot;) LocalDateTime dayStart,
+&nbsp;                                                 @Param(&quot;dayEnd&quot;) LocalDateTime dayEnd);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

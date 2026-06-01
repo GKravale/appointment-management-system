@@ -1,0 +1,302 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.service</a>
+</div>
+
+<h1>Coverage Summary for Class: UserService (com.appointment.system.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserService</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    53.3%
+  </span>
+  <span class="absValue">
+    (48/90)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98.6%
+  </span>
+  <span class="absValue">
+    (71/72)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UserService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    88.9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    53.3%
+  </span>
+  <span class="absValue">
+    (48/90)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98.6%
+  </span>
+  <span class="absValue">
+    (71/72)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.service;
+&nbsp;
+&nbsp;import com.appointment.system.dto.request.ChangePasswordRequest;
+&nbsp;import com.appointment.system.dto.request.ForgotPasswordRequest;
+&nbsp;import com.appointment.system.dto.request.RegisterRequest;
+&nbsp;import com.appointment.system.dto.request.ResetPasswordRequest;
+&nbsp;import com.appointment.system.entity.Client;
+&nbsp;import com.appointment.system.entity.PasswordResetToken;
+&nbsp;import com.appointment.system.entity.Provider;
+&nbsp;import com.appointment.system.entity.User;
+&nbsp;import com.appointment.system.enums.AccountStatus;
+&nbsp;import com.appointment.system.enums.Role;
+&nbsp;import com.appointment.system.repository.ClientRepository;
+&nbsp;import com.appointment.system.repository.PasswordResetTokenRepository;
+&nbsp;import com.appointment.system.repository.ProviderRepository;
+&nbsp;import com.appointment.system.repository.UserRepository;
+&nbsp;import jakarta.persistence.EntityNotFoundException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;public class UserService {
+&nbsp;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final ClientRepository clientRepository;
+&nbsp;    private final ProviderRepository providerRepository;
+&nbsp;    private final PasswordEncoder passwordEncoder;
+&nbsp;    private final PasswordResetTokenRepository passwordResetTokenRepository;
+&nbsp;    private final EmailService emailService;
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void register(RegisterRequest request) {
+<b class="pc">&nbsp;        if (userRepository.existsByUsername(request.getUsername())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Username already taken&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (userRepository.existsByEmail(request.getEmail())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Email already registered&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!request.getPassword().equals(request.getConfirmPassword())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Passwords do not match&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (request.getRole() == Role.ROLE_ADMIN) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Cannot register as admin&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (request.getRole() == Role.ROLE_CLIENT) {</b>
+<b class="fc">&nbsp;            Client client = new Client(</b>
+<b class="fc">&nbsp;                    request.getFirstName(),</b>
+<b class="fc">&nbsp;                    request.getLastName(),</b>
+<b class="fc">&nbsp;                    request.getPhoneNr()</b>
+&nbsp;            );
+<b class="fc">&nbsp;            clientRepository.save(client);</b>
+&nbsp;
+<b class="fc">&nbsp;            User user = new User(</b>
+<b class="fc">&nbsp;                    request.getUsername(),</b>
+<b class="fc">&nbsp;                    passwordEncoder.encode(request.getPassword()),</b>
+<b class="fc">&nbsp;                    request.getEmail(),</b>
+&nbsp;                    Role.ROLE_CLIENT,
+&nbsp;                    client
+&nbsp;            );
+<b class="fc">&nbsp;            userRepository.save(user);</b>
+&nbsp;
+&nbsp;        } else {
+<b class="fc">&nbsp;            Provider provider = new Provider(</b>
+<b class="fc">&nbsp;                    request.getFirstName(),</b>
+<b class="fc">&nbsp;                    request.getLastName(),</b>
+<b class="fc">&nbsp;                    request.getPhoneNr(),</b>
+&nbsp;                    null,
+&nbsp;                    null
+&nbsp;            );
+<b class="fc">&nbsp;            providerRepository.save(provider);</b>
+&nbsp;
+<b class="fc">&nbsp;            User user = new User(</b>
+<b class="fc">&nbsp;                    request.getUsername(),</b>
+<b class="fc">&nbsp;                    passwordEncoder.encode(request.getPassword()),</b>
+<b class="fc">&nbsp;                    request.getEmail(),</b>
+&nbsp;                    Role.ROLE_PROVIDER,
+&nbsp;                    provider
+&nbsp;            );
+<b class="fc">&nbsp;            user.setAccountStatus(AccountStatus.PENDING);</b>
+<b class="fc">&nbsp;            userRepository.save(user);</b>
+&nbsp;        }
+<b class="pc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public boolean usernameExists(String username) {
+<b class="pc">&nbsp;        return userRepository.existsByUsername(username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean emailExists(String email) {
+<b class="pc">&nbsp;        return userRepository.existsByEmail(email);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void initiatePasswordReset(ForgotPasswordRequest request) {
+<b class="pc">&nbsp;        userRepository.findByEmail(request.getEmail()).ifPresent(user -&gt; {</b>
+<b class="fc">&nbsp;            passwordResetTokenRepository.deleteByUser(user);</b>
+&nbsp;
+<b class="fc">&nbsp;            String token = UUID.randomUUID().toString();</b>
+<b class="fc">&nbsp;            passwordResetTokenRepository.save(new PasswordResetToken(user, token));</b>
+&nbsp;
+<b class="fc">&nbsp;            emailService.sendPasswordResetEmail(user.getEmail(), user.getUsername(), token);</b>
+&nbsp;
+<b class="fc">&nbsp;            log.info(&quot;Password reset initiated for user: {}&quot;, user.getUsername());</b>
+&nbsp;        });
+<b class="pc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void resetPassword(ResetPasswordRequest request) {
+<b class="pc">&nbsp;        if (!request.getPassword().equals(request.getConfirmPassword())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Passwords do not match&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid or expired reset link&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        if (resetToken.isExpired()) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;This reset link has expired. Please request a new one.&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (resetToken.getUsed()) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;This reset link has already been used.&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        User user = resetToken.getUser();</b>
+<b class="fc">&nbsp;        user.setPassword(passwordEncoder.encode(request.getPassword()));</b>
+<b class="fc">&nbsp;        userRepository.save(user);</b>
+&nbsp;
+<b class="fc">&nbsp;        resetToken.setUsed(true);</b>
+<b class="fc">&nbsp;        passwordResetTokenRepository.save(resetToken);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Password reset completed for user: {}&quot;, user.getUsername());</b>
+<b class="pc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void changePassword(Long userId, ChangePasswordRequest request) {
+<b class="pc">&nbsp;        if (!request.getNewPassword().equals(request.getConfirmPassword())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Passwords do not match&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        User user = userRepository.findById(userId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Current password is incorrect&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        user.setPassword(passwordEncoder.encode(request.getNewPassword()));</b>
+<b class="fc">&nbsp;        userRepository.save(user);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Password changed for user: {}&quot;, user.getUsername());</b>
+<b class="pc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void deleteAccount(Long userId) {
+<b class="pc">&nbsp;        User user = userRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</b>
+<b class="fc">&nbsp;        user.setAccountStatus(AccountStatus.SUSPENDED);</b>
+<b class="fc">&nbsp;        user.getPerson().setIsDeleted(true);</b>
+<b class="fc">&nbsp;        userRepository.save(user);</b>
+<b class="fc">&nbsp;        log.info(&quot;Account deleted for user: {}&quot;, user.getUsername());</b>
+<b class="pc">&nbsp;    }</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

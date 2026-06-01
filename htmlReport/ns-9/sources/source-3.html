@@ -1,0 +1,185 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ClientService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ClientService (com.appointment.system.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ClientService</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    44.4%
+  </span>
+  <span class="absValue">
+    (8/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.4%
+  </span>
+  <span class="absValue">
+    (17/18)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ClientService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    44.4%
+  </span>
+  <span class="absValue">
+    (8/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.4%
+  </span>
+  <span class="absValue">
+    (17/18)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.service;
+&nbsp;
+&nbsp;import com.appointment.system.dto.request.UpdateClientProfileRequest;
+&nbsp;import com.appointment.system.dto.response.ClientProfileResponse;
+&nbsp;import com.appointment.system.entity.Client;
+&nbsp;import com.appointment.system.repository.ClientRepository;
+&nbsp;import com.appointment.system.repository.UserRepository;
+&nbsp;import jakarta.persistence.EntityNotFoundException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;public class ClientService {
+&nbsp;
+&nbsp;    private final ClientRepository clientRepository;
+&nbsp;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;
+&nbsp;    public ClientProfileResponse getProfile(Long personId) {
+<b class="pc">&nbsp;        log.debug(&quot;Retrieving profile for client {}&quot;, personId);</b>
+<b class="fc">&nbsp;        Client client = clientRepository.findById(personId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Client not&quot; +</b>
+&nbsp;                &quot; found&quot;));
+<b class="pc">&nbsp;        return toResponse(client);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void updateProfile(Long personId, UpdateClientProfileRequest request) {
+<b class="pc">&nbsp;        Client client = clientRepository.findById(personId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Client not&quot; +</b>
+&nbsp;                &quot; found&quot;));
+<b class="fc">&nbsp;        client.setFirstName(request.getFirstName());</b>
+<b class="fc">&nbsp;        client.setLastName(request.getLastName());</b>
+<b class="fc">&nbsp;        client.setPhoneNr(request.getPhoneNr());</b>
+<b class="fc">&nbsp;        client.setNotes(request.getNotes());</b>
+<b class="fc">&nbsp;        log.info(&quot;Client profile updated: id={}&quot;, personId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ClientProfileResponse toResponse(Client client) {
+<b class="fc">&nbsp;        ClientProfileResponse response = new ClientProfileResponse();</b>
+<b class="fc">&nbsp;        response.setId(client.getId());</b>
+<b class="fc">&nbsp;        response.setFirstName(client.getFirstName());</b>
+<b class="fc">&nbsp;        response.setLastName(client.getLastName());</b>
+<b class="fc">&nbsp;        response.setPhoneNr(client.getPhoneNr());</b>
+<b class="fc">&nbsp;        response.setNotes(client.getNotes());</b>
+<b class="fc">&nbsp;        userRepository.findByPersonId(client.getId()).ifPresent(u -&gt; response.setEmail(u.getEmail()));</b>
+<b class="fc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>
