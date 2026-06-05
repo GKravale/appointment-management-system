@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Schedule</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Provider schedule</h2>
+        <a th:href="@{/admin/dashboard}" class="btn btn-sm btn-outline-secondary">Back</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted mb-3">Select a provider to view their schedule and book appointments.</p>
+            <div class="row g-3">
+                <div class="col-md-3" th:each="provider : ${providers}">
+                    <a th:href="@{/admin/schedule/{id}(id=${provider.id})}"
+                       class="card text-decoration-none h-100">
+                        <div class="card-body text-center py-4">
+                            <img th:if="${provider.profilePicturePath != null}"
+                                 th:src="@{/{p}(p=${provider.profilePicturePath})}"
+                                 class="rounded-circle mb-2"
+                                 style="width:56px;height:56px;object-fit:cover;"
+                                 th:alt="${provider.firstName}"/>
+                            <div th:unless="${provider.profilePicturePath != null}"
+                                 class="bg-secondary rounded-circle d-inline-flex
+                                        align-items-center justify-content-center mb-2"
+                                 style="width:56px;height:56px;">
+                                <i class="bi bi-person-fill text-white fs-4"></i>
+                            </div>
+                            <div class="fw-semibold"
+                                 th:text="${provider.firstName + ' ' + provider.lastName}"></div>
+                            <small class="text-muted"
+                                   th:text="${provider.location ?: ''}"></small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

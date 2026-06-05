@@ -1,0 +1,116 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RegisterRequest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.dto.request</a>
+</div>
+
+<h1>Coverage Summary for Class: RegisterRequest (com.appointment.system.dto.request)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">RegisterRequest</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.dto.request;
+&nbsp;
+&nbsp;import com.appointment.system.enums.Role;
+&nbsp;import jakarta.validation.constraints.*;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import lombok.Setter;
+&nbsp;
+&nbsp;@Getter
+&nbsp;@Setter
+&nbsp;@NoArgsConstructor
+&nbsp;public class RegisterRequest {
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Size(min = 3, max = 50)
+&nbsp;    private String username;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Email
+&nbsp;    private String email;
+&nbsp;
+&nbsp;    @NotBlank(message = &quot;Password is required&quot;)
+&nbsp;    @Size(min = 8, max = 100, message = &quot;Password must be at least 8 characters&quot;)
+&nbsp;    @Pattern(regexp = &quot;^(?=.*[A-Z])(?=.*[0-9]).+$&quot;, message = &quot;Password must contain at least one uppercase letter &quot; +
+&nbsp;            &quot;and one number&quot;)
+&nbsp;    private String password;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Size(min = 8, max = 100)
+&nbsp;    private String confirmPassword;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Size(min = 3, max = 30)
+&nbsp;    private String firstName;
+&nbsp;
+&nbsp;    @NotBlank
+&nbsp;    @Size(min = 3, max = 30)
+&nbsp;    private String lastName;
+&nbsp;
+&nbsp;    @Pattern(regexp = &quot;^\\+?[\\d\\s\\-]{7,20}$&quot;, message = &quot;Please enter a valid phone number (e.g. +371 22233233)&quot;)
+&nbsp;    private String phoneNr;
+&nbsp;
+&nbsp;    @NotNull
+&nbsp;    private Role role;
+&nbsp;
+&nbsp;    @AssertTrue(message = &quot;You must accept the terms and conditions&quot;)
+&nbsp;    private Boolean acceptTerms = false;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

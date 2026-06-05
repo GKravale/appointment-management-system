@@ -1,0 +1,158 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PortfolioController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: PortfolioController (com.appointment.system.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PortfolioController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7.7%
+  </span>
+  <span class="absValue">
+    (1/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.controller;
+&nbsp;
+&nbsp;import com.appointment.system.service.PortfolioService;
+&nbsp;import com.appointment.system.security.CustomUserDetails;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.stereotype.Controller;
+&nbsp;import org.springframework.ui.Model;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Controller
+&nbsp;@RequestMapping(&quot;/provider/portfolio&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class PortfolioController {
+&nbsp;
+&nbsp;    private final PortfolioService portfolioService;
+&nbsp;
+&nbsp;    @GetMapping
+&nbsp;    public String portfolioPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
+<b class="nc">&nbsp;        model.addAttribute(&quot;assets&quot;, portfolioService.getPortfolioAssets(user.getPersonId()));</b>
+<b class="nc">&nbsp;        return &quot;provider/portfolio&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/upload&quot;)
+&nbsp;    public String uploadMedia(@AuthenticationPrincipal CustomUserDetails user,
+&nbsp;                              @RequestParam(&quot;file&quot;) MultipartFile file, @RequestParam(value = &quot;altText&quot;, required =
+&nbsp;                    false) String altText, RedirectAttributes redirectAttributes) {
+&nbsp;        try {
+<b class="nc">&nbsp;            portfolioService.uploadMedia(user.getPersonId(), file, altText);</b>
+<b class="nc">&nbsp;            redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Image uploaded successfully&quot;);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, e.getMessage());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        log.info(&quot;Provider {} uploaded image {} in their portfolio&quot;, user.getUsername(), file.getOriginalFilename());</b>
+<b class="nc">&nbsp;        return &quot;redirect:/provider/portfolio&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/delete/{id}&quot;)
+&nbsp;    public String deleteMedia(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user,
+&nbsp;                              RedirectAttributes redirectAttributes) {
+&nbsp;        try {
+<b class="nc">&nbsp;            portfolioService.deleteMedia(id, user.getPersonId());</b>
+<b class="nc">&nbsp;            redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Image deleted&quot;);</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            redirectAttributes.addFlashAttribute(&quot;errorMessage&quot;, e.getMessage());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        log.info(&quot;Provider {} deleted image {} in their portfolio&quot;, user.getUsername(), id);</b>
+<b class="nc">&nbsp;        return &quot;redirect:/provider/portfolio&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

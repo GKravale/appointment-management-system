@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Register</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title mb-4">Create account</h4>
+
+                    <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post">
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="firstName" class="form-label">First name</label>
+                                <input type="text" id="firstName" th:field="*{firstName}"
+                                       class="form-control" th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{firstName}"></div>
+                            </div>
+                            <div class="col">
+                                <label for="lastName" class="form-label">Last name</label>
+                                <input type="text" id="lastName" th:field="*{lastName}"
+                                       class="form-control" th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{lastName}"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phoneNr" class="form-label">Phone number</label>
+                            <input type="text" id="phoneNr" th:field="*{phoneNr}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('phoneNr')} ? 'is-invalid'"/>
+                            <div class="invalid-feedback" th:errors="*{phoneNr}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" id="username" th:field="*{username}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"/>
+                            <div class="invalid-feedback" th:errors="*{username}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" th:field="*{email}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"/>
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" th:field="*{password}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"/>
+                            <div class="invalid-feedback" th:errors="*{password}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm password</label>
+                            <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"/>
+                            <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">I am registering as</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           th:field="*{role}" th:value="ROLE_CLIENT" id="roleClient"/>
+                                    <label class="form-check-label" for="roleClient">Client</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           th:field="*{role}" th:value="ROLE_PROVIDER" id="roleProvider"/>
+                                    <label class="form-check-label" for="roleProvider">Provider</label>
+                                </div>
+                            </div>
+                            <div class="text-danger small mt-1" th:errors="*{role}"></div>
+                        </div>
+
+                        <div class="d-grid">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           th:field="*{acceptTerms}"
+                                           id="acceptTerms"
+                                           th:classappend="${#fields.hasErrors('acceptTerms')} ? 'is-invalid'"/>
+                                    <label class="form-check-label" for="acceptTerms">
+                                        I agree to the
+                                        <a th:href="@{/privacy}" target="_blank">Privacy Policy</a>
+                                        and
+                                        <a th:href="@{/terms}" target="_blank">Terms of Service</a>
+                                    </label>
+                                    <div class="invalid-feedback" th:errors="*{acceptTerms}"></div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </form>
+
+                    <hr/>
+                    <p class="text-center mb-0">
+                        Already have an account?
+                        <a th:href="@{/auth/login}">Log in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title layout:title-pattern="$CONTENT_TITLE - Appointment System">Appointment System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+    <link th:href="@{/css/main.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">Appointment Management System</a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"
+                    sec:authorize="!hasAuthority('ROLE_PROVIDER')
+                                   and !hasAuthority('ROLE_ADMIN')">
+                    <a class="nav-link" th:href="@{/providers}">
+                        Browse providers
+                    </a>
+                </li>
+                <li class="nav-item"
+                    sec:authorize="hasAuthority('ROLE_CLIENT')">
+                    <a class="nav-link" th:href="@{/client/dashboard}">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item"
+                    sec:authorize="hasAuthority('ROLE_CLIENT')">
+                    <a class="nav-link"
+                       th:href="@{/client/appointments}">
+                        Appointments
+                    </a>
+                </li>
+                <li class="nav-item"
+                    sec:authorize="hasAuthority('ROLE_PROVIDER')">
+                    <a class="nav-link"
+                       th:href="@{/provider/dashboard}">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item"
+                    sec:authorize="hasAuthority('ROLE_PROVIDER')">
+                    <a class="nav-link"
+                       th:href="@{/provider/schedule}">
+                        Schedule
+                    </a>
+                </li>
+                <li class="nav-item"
+                    sec:authorize="hasAuthority('ROLE_PROVIDER')">
+                    <a class="nav-link"
+                       th:href="@{/provider/appointments}">
+                        Appointments
+                    </a>
+                </li>
+                <li class="nav-item dropdown"
+                    sec:authorize="hasAuthority('ROLE_PROVIDER')">
+                    <a class="nav-link dropdown-toggle" href="#"
+                       data-bs-toggle="dropdown">
+                        Manage
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/provider/services}">
+                                <i class="bi bi-scissors me-2"></i>
+                                Services
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/provider/availability}">
+                                <i class="bi bi-clock me-2"></i>
+                                Availability
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/provider/portfolio}">
+                                <i class="bi bi-images me-2"></i>
+                                Portfolio
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/provider/posts}">
+                                <i class="bi bi-file-post me-2"></i>
+                                Posts
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item"
+                    sec:authorize="hasAuthority('ROLE_ADMIN')">
+                    <a class="nav-link"
+                       th:href="@{/admin/dashboard}">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item dropdown"
+                    sec:authorize="hasAuthority('ROLE_ADMIN')">
+                    <a class="nav-link dropdown-toggle" href="#"
+                       data-bs-toggle="dropdown">
+                        Manage
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/admin/providers}">
+                                <i class="bi bi-person-badge me-2"></i>
+                                Providers
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/admin/clients}">
+                                <i class="bi bi-people me-2"></i>
+                                Clients
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/admin/appointments}">
+                                <i class="bi bi-calendar-week me-2"></i>
+                                Appointments
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/admin/services}">
+                                <i class="bi bi-scissors me-2"></i>
+                                Services
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav align-items-center">
+
+                <li class="nav-item"
+                    sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/auth/login}">
+                        Login
+                    </a>
+                </li>
+                <li class="nav-item"
+                    sec:authorize="isAnonymous()">
+                    <a class="nav-link btn btn-sm btn-outline-light ms-2 px-3"
+                       th:href="@{/auth/register}">
+                        Register
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <button id="darkModeToggle"
+                            aria-label="Toggle dark mode">
+                        <i class="bi bi-moon-fill"
+                           id="darkModeIcon"></i>
+                    </button>
+                </li>
+
+                <li class="nav-item"
+                    sec:authorize="isAuthenticated()">
+                    <a class="nav-link position-relative"
+                       th:href="@{/notifications}"
+                       aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="position-absolute top-0 start-100
+                                     translate-middle badge
+                                     rounded-pill bg-danger"
+                              th:if="${unreadNotificationCount != null
+                                       and unreadNotificationCount > 0}"
+                              th:text="${unreadNotificationCount}">
+                        </span>
+                    </a>
+                </li>
+
+                <li class="nav-item dropdown"
+                    sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle" href="#"
+                       data-bs-toggle="dropdown">
+                        <sec:authentication
+                                property="principal.username"/>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li sec:authorize="hasAuthority('ROLE_CLIENT')">
+                            <a class="dropdown-item"
+                               th:href="@{/client/profile}">
+                                <i class="bi bi-person me-2"></i>
+                                Profile
+                            </a>
+                        </li>
+                        <li sec:authorize="hasAuthority('ROLE_PROVIDER')">
+                            <a class="dropdown-item"
+                               th:href="@{/provider/profile}">
+                                <i class="bi bi-person-badge me-2"></i>
+                                Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item"
+                               th:href="@{/auth/change-password}">
+                                <i class="bi bi-key me-2"></i>
+                                Change password
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider"/>
+                        </li>
+                        <li>
+                            <form th:action="@{/auth/logout}"
+                                  method="post">
+                                <input th:if="${_csrf != null}" type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}"/>
+                                <button type="submit"
+                                        class="dropdown-item
+                                               border-0 bg-transparent">
+                                    <i class="bi bi-box-arrow-right me-2"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<main class="container my-4">
+    <div th:if="${successMessage}" class="alert alert-success"
+         th:text="${successMessage}"></div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger"
+         th:text="${errorMessage}"></div>
+
+    <div layout:fragment="content"></div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3 mt-auto">
+    <div class="container">
+        <small>
+            Appointment Management System &nbsp;|&nbsp;
+            <a th:href="@{/privacy}" class="text-white-50 text-decoration-none">
+                Privacy Policy
+            </a>
+            &nbsp;|&nbsp;
+            <a th:href="@{/terms}" class="text-white-50 text-decoration-none">
+                Terms of Service
+            </a>
+        </small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<th:block layout:fragment="scripts"></th:block>
+<script>
+    (function () {
+        const saved = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+        updateIcon(saved);
+
+        function updateIcon(theme) {
+            const icon = document.getElementById('darkModeIcon');
+            if (!icon) return;
+            icon.className = theme === 'dark'
+                ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('darkModeToggle');
+            if (!btn) return;
+            const current = document.documentElement
+                .getAttribute('data-theme') || 'light';
+            updateIcon(current);
+
+            btn.addEventListener('click', function () {
+                const current = document.documentElement
+                    .getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                updateIcon(next);
+            });
+        });
+    })();
+</script>
+
+</body>
+</html>

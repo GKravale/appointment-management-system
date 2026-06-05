@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Availability</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">My availability</h2>
+        <button class="btn btn-primary"
+                data-bs-toggle="modal" data-bs-target="#addAvailabilityModal">
+            <i class="bi bi-plus-lg me-1"></i>Add slot
+        </button>
+    </div>
+
+    <div th:if="${#lists.isEmpty(availabilities)}"
+         class="text-center text-muted py-5">
+        <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+        <p>No availability set yet. Add your working hours so clients can book you.</p>
+    </div>
+
+    <div class="table-responsive" th:unless="${#lists.isEmpty(availabilities)}">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>Day</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Effective from</th>
+                <th>Effective to</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="slot : ${availabilities}">
+                <td th:text="${slot.dayOfWeek}"></td>
+                <td th:text="${#temporals.format(slot.startTime, 'HH:mm')}"></td>
+                <td th:text="${#temporals.format(slot.endTime, 'HH:mm')}"></td>
+                <td th:text="${slot.effectiveFrom ?: '—'}"></td>
+                <td th:text="${slot.effectiveTo ?: '—'}"></td>
+                <td>
+                    <form th:action="@{/provider/availability/delete/{id}(id=${slot.id})}"
+                          method="post">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Remove this slot?')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="addAvailabilityModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add availability</h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/provider/availability/create}"
+                      th:object="${createRequest}" method="post">
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label">Day of week</label>
+                            <select th:field="*{dayOfWeek}" class="form-select"
+                                    th:classappend="${#fields.hasErrors('dayOfWeek')} ? 'is-invalid'">
+                                <option value="">Select day</option>
+                                <option th:each="day : ${days}"
+                                        th:value="${day}"
+                                        th:text="${day}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{dayOfWeek}"></div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label">Start time</label>
+                                <input type="time" th:field="*{startTime}"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{startTime}"></div>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">End time</label>
+                                <input type="time" th:field="*{endTime}"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{endTime}"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label">
+                                    Effective from
+                                    <small class="text-muted">(optional)</small>
+                                </label>
+                                <input type="date" th:field="*{effectiveFrom}"
+                                       class="form-control"/>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">
+                                    Effective to
+                                    <small class="text-muted">(optional)</small>
+                                </label>
+                                <input type="date" th:field="*{effectiveTo}"
+                                       class="form-control"/>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time blocks section -->
+    <div class="d-flex justify-content-between align-items-center mt-5 mb-3">
+        <h4 class="mb-0">Time blocks</h4>
+        <button class="btn btn-outline-primary"
+                data-bs-toggle="modal" data-bs-target="#addTimeBlockModal">
+            <i class="bi bi-plus-lg me-1"></i>Add time block
+        </button>
+    </div>
+
+    <p class="text-muted small mb-3">
+        Time blocks prevent bookings during specific periods — use for lunch breaks,
+        holidays, special events, or any one-off unavailability.
+    </p>
+
+    <div th:if="${#lists.isEmpty(timeBlocks)}"
+         class="text-center text-muted py-4">
+        <i class="bi bi-slash-circle fs-2 d-block mb-2"></i>
+        No time blocks set.
+    </div>
+
+    <div class="table-responsive" th:unless="${#lists.isEmpty(timeBlocks)}">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Note</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="block : ${timeBlocks}">
+                <td>
+                    <span class="badge"
+                          th:classappend="${block.type.name() == 'UNAVAILABLE'}
+                                          ? 'bg-danger'
+                                          : (${block.type.name() == 'BREAK'}
+                                             ? 'bg-warning text-dark' : 'bg-info')"
+                          th:text="${block.type}"></span>
+                </td>
+                <td th:text="${#temporals.format(block.startDateTime,
+                             'EEE dd MMM yyyy HH:mm')}"></td>
+                <td th:text="${#temporals.format(block.endDateTime,
+                             'EEE dd MMM yyyy HH:mm')}"></td>
+                <td th:text="${block.note ?: '—'}"></td>
+                <td>
+                    <form th:action="@{/provider/timeblocks/delete/{id}(id=${block.id})}"
+                          method="post">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Remove this time block?')"
+                                aria-label="Remove time block">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add time block modal -->
+    <div class="modal fade" id="addTimeBlockModal" tabindex="-1"
+         aria-labelledby="addTimeBlockModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTimeBlockModalLabel">
+                        Add time block
+                    </h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/provider/timeblocks/create}" method="post">
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label">Type</label>
+                            <select name="type" class="form-select" required>
+                                <option th:each="bt : ${blockTypes}"
+                                        th:value="${bt}"
+                                        th:text="${bt}"></option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">From</label>
+                            <input type="datetime-local" name="startDateTime"
+                                   class="form-control" required/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">To</label>
+                            <input type="datetime-local" name="endDateTime"
+                                   class="form-control" required/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Note <small class="text-muted">(optional)</small>
+                            </label>
+                            <input type="text" name="note" class="form-control"
+                                   placeholder="e.g. Lunch break, Holiday, Staff training"/>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

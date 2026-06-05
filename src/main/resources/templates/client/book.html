@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Book Appointment</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+            <div class="d-flex align-items-center mb-4 gap-2">
+                <span class="badge rounded-pill bg-primary px-3 py-2" id="step1badge">
+                    1 · Pick a date
+                </span>
+                <div class="flex-grow-1 border-top"></div>
+                <span class="badge rounded-pill bg-secondary px-3 py-2" id="step2badge">
+                    2 · Pick a time
+                </span>
+                <div class="flex-grow-1 border-top"></div>
+                <span class="badge rounded-pill bg-secondary px-3 py-2" id="step3badge">
+                    3 · Confirm
+                </span>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-7">
+
+                    <div class="card mb-3" id="calendarCard">
+                        <div class="card-body">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+
+                    <div class="card d-none" id="slotsCard">
+                        <div class="card-header d-flex justify-content-between
+                                    align-items-center">
+                            <h6 class="mb-0">
+                                Available times for
+                                <span id="selectedDateDisplay" class="fw-bold"></span>
+                            </h6>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    id="changeDateBtn" type="button">
+                                Change date
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="slotsContainer" class="d-flex flex-wrap gap-2">
+                            </div>
+                            <div id="noSlotsMsg" class="text-muted d-none">
+                                <i class="bi bi-calendar-x me-2"></i>
+                                No available slots on this day. Please pick another date.
+                            </div>
+                            <div id="slotsLoading" class="text-muted d-none">
+                                <div class="spinner-border spinner-border-sm me-2"
+                                     role="status"></div>
+                                Loading available times...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Booking summary</h6>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Service</small>
+                                <span class="fw-semibold"
+                                      th:text="${service.title}"></span>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Duration</small>
+                                <span th:text="${service.effectiveDuration +
+                                               ' minutes'}"></span>
+                            </div>
+                            <div class="mb-3" th:if="${service.effectivePrice != null}">
+                                <small class="text-muted d-block">Price estimate</small>
+                                <span th:text="${service.effectivePrice}"></span>
+                            </div>
+
+                            <div id="selectedTimeInfo" class="d-none">
+                                <hr/>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Selected time</small>
+                                    <span class="fw-semibold text-success"
+                                          id="selectedTimeSummary"></span>
+                                </div>
+                            </div>
+
+                            <div id="noTimeSelected" class="alert alert-light small">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Select a date and time to continue
+                            </div>
+
+                            <form th:action="@{/client/book}"
+                                  th:object="${bookRequest}"
+                                  method="post" id="bookingForm">
+
+                                <input type="hidden"
+                                       name="providerServiceOfferingId"
+                                       th:value="${service.id}"/>
+                                <input type="hidden"
+                                       name="startTime"
+                                       id="startTimeField"/>
+
+                                <div class="mb-3">
+                                    <label for="clientNotes" class="form-label small">
+                                        Notes for provider
+                                        <span class="text-muted">(optional)</span>
+                                    </label>
+                                    <textarea th:field="*{clientNotes}"
+                                              id="clientNotes"
+                                              class="form-control form-control-sm"
+                                              rows="3"
+                                              placeholder="Allergies, preferences, references...">
+                                    </textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="termsCheck" required/>
+                                        <label class="form-check-label" for="termsCheck">
+                                            I agree to the
+                                            <a th:href="@{/terms}" target="_blank">Terms of Service</a>
+                                        </label>
+                                        <div class="invalid-feedback">
+                                            You must agree before booking.
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit"
+                                        id="confirmBtn"
+                                        class="btn btn-primary w-100 disabled"
+                                        aria-disabled="true">
+                                    <i class="bi bi-calendar-check me-2"></i>
+                                    Request appointment
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<th:block layout:fragment="scripts">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
+          rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js">
+    </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const SERVICE_ID = [[${service.id}]];
+        const DURATION = [[${service.effectiveDuration}]];
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const calendarEl = document.getElementById('calendar');
+            const slotsCard = document.getElementById('slotsCard');
+            const calendarCard = document.getElementById('calendarCard');
+            const slotsContainer = document.getElementById('slotsContainer');
+            const noSlotsMsg = document.getElementById('noSlotsMsg');
+            const slotsLoading = document.getElementById('slotsLoading');
+            const selectedDateDisplay = document.getElementById('selectedDateDisplay');
+            const step1badge = document.getElementById('step1badge');
+            const step2badge = document.getElementById('step2badge');
+            const step3badge = document.getElementById('step3badge');
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                firstDay: 1,
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                height: 'auto',
+                validRange: {
+                    start: new Date().toISOString().split('T')[0]
+                },
+
+                datesSet: function(info) {
+                    colorDays(info.startStr, info.endStr);
+                },
+                dayCellDidMount: function(info) {
+                    info.el.setAttribute('data-date', info.dateStr);
+                },
+                dateClick: function (info) {
+                    loadSlots(info.dateStr);
+                }
+            });
+
+            calendar.render();
+
+            function colorDays(startStr, endStr) {
+                fetch('/client/available-days?serviceId=' + SERVICE_ID
+                    + '&from=' + startStr + '&to=' + endStr)
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        Object.keys(data).forEach(function(dateStr) {
+                            const cell = document.querySelector('[data-date="' + dateStr + '"]');
+                            if (!cell) return;
+
+                            cell.querySelectorAll('.availability-dot').forEach(e => e.remove());
+
+                            const dot = document.createElement('div');
+                            dot.className = 'availability-dot';
+                            dot.style.cssText =
+                                'width:6px;height:6px;border-radius:50%;margin:2px auto;';
+                            dot.style.backgroundColor =
+                                data[dateStr] ? '#198754' : '#dc3545';
+
+                            cell.querySelector('.fc-daygrid-day-top').appendChild(dot);
+                        });
+                    });
+            }
+
+            document.getElementById('changeDateBtn').addEventListener('click', function() {
+                slotsCard.classList.add('d-none');
+                calendarCard.classList.remove('d-none');
+                calendar.updateSize();
+                step1badge.classList.replace('bg-success', 'bg-primary');
+                step2badge.classList.replace('bg-success', 'bg-secondary');
+                step3badge.classList.replace('bg-success', 'bg-secondary');
+                clearSelection();
+            });
+
+            function loadSlots(dateStr) {
+                slotsContainer.innerHTML = '';
+                noSlotsMsg.classList.add('d-none');
+                slotsLoading.classList.remove('d-none');
+
+                calendarCard.classList.add('d-none');
+                slotsCard.classList.remove('d-none');
+
+                const dateObj = new Date(dateStr + 'T00:00:00');
+                selectedDateDisplay.textContent = dateObj.toLocaleDateString('en-GB', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                });
+
+                step1badge.className = 'badge rounded-pill bg-success px-3 py-2';
+                step1badge.textContent = '✓ Date selected';
+                step2badge.className = 'badge rounded-pill bg-primary px-3 py-2';
+
+                fetch('/client/slots?serviceId=' + SERVICE_ID + '&date=' + dateStr)
+                    .then(function(res) { return res.json(); })
+                    .then(function(events) {
+                        slotsLoading.classList.add('d-none');
+
+                        if (events.length === 0) {
+                            noSlotsMsg.classList.remove('d-none');
+                            return;
+                        }
+
+                        // group slots by hour
+                        const byHour = {};
+                        events.forEach(function(event) {
+                            const startTime = event.extendedProps.startTime;
+                            const hour = startTime.substring(11, 13);
+                            if (!byHour[hour]) byHour[hour] = [];
+                            byHour[hour].push(startTime);
+                        });
+
+                        Object.keys(byHour).sort().forEach(function(hour) {
+                            const row = document.createElement('div');
+                            row.className = 'd-flex flex-wrap gap-2 mb-2';
+
+                            byHour[hour].forEach(function(startTime) {
+                                const timeLabel = startTime.substring(11, 16);
+                                const btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.className = 'btn btn-outline-primary';
+                                btn.textContent = timeLabel;
+                                btn.setAttribute('data-start', startTime);
+                                btn.setAttribute('aria-label', 'Select time slot ' + timeLabel);
+
+                                btn.addEventListener('click', function() {
+                                    document.querySelectorAll('#slotsContainer .btn')
+                                        .forEach(b => {
+                                            b.classList.remove('btn-primary');
+                                            b.classList.add('btn-outline-primary');
+                                        });
+                                    btn.classList.remove('btn-outline-primary');
+                                    btn.classList.add('btn-primary');
+                                    selectTime(startTime, dateStr);
+                                });
+
+                                row.appendChild(btn);
+                            });
+
+                            slotsContainer.appendChild(row);
+                        });
+                    })
+                    .catch(function(err) {
+                        slotsLoading.classList.add('d-none');
+                        console.error('Error loading slots:', err);
+                    });
+            }
+
+            function selectTime(startTime, dateStr) {
+                document.getElementById('startTimeField').value = startTime;
+
+                const dt = new Date(startTime);
+                const display = dt.toLocaleString('en-GB', {
+                    weekday: 'long', day: 'numeric', month: 'long',
+                    year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                document.getElementById('selectedTimeSummary').textContent = display;
+                document.getElementById('selectedTimeInfo').classList.remove('d-none');
+                document.getElementById('noTimeSelected').classList.add('d-none');
+
+                step2badge.className = 'badge rounded-pill bg-success px-3 py-2';
+                step2badge.textContent = '✓ Time selected';
+                step3badge.className = 'badge rounded-pill bg-primary px-3 py-2';
+
+                const btn = document.getElementById('confirmBtn');
+                btn.classList.remove('disabled');
+                btn.removeAttribute('aria-disabled');
+            }
+
+            function clearSelection() {
+                document.getElementById('startTimeField').value = '';
+                document.getElementById('selectedTimeInfo').classList.add('d-none');
+                document.getElementById('noTimeSelected').classList.remove('d-none');
+                const btn = document.getElementById('confirmBtn');
+                btn.classList.add('disabled');
+                btn.setAttribute('aria-disabled', 'true');
+            }
+        });
+        /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>

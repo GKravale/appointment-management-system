@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>My Dashboard</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between
+                            align-items-center">
+                    <h6 class="mb-0">Upcoming appointments</h6>
+                    <a th:href="@{/client/appointments}"
+                       class="btn btn-sm btn-outline-primary">All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(
+                                  appointments.?[status.name()
+                                  == 'CONFIRMED'])}"
+                         class="text-muted text-center py-3 small">
+                        No upcoming appointments.
+                    </div>
+                    <div th:each="apt : ${appointments}"
+                         th:if="${apt.status.name() == 'CONFIRMED'}"
+                         class="px-3 py-2 border-bottom">
+                        <div class="fw-semibold small"
+                             th:text="${apt.serviceTitleSnapshot}"></div>
+                        <div class="text-muted small">
+                            with
+                            <span th:text="${apt.providerFirstName + ' '
+                                            + apt.providerLastName}"></span>
+                        </div>
+                        <div class="text-muted small"
+                             th:text="${#temporals.format(apt.startTime,
+                                      'EEE dd MMM HH:mm')}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick links</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a th:href="@{/providers}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-search me-2"></i>Browse providers
+                    </a>
+                    <a th:href="@{/client/appointments}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        My appointments
+                    </a>
+                    <a th:href="@{/client/profile}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-person me-2"></i>My profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h5 class="mb-3">Latest from providers</h5>
+
+            <div th:if="${#lists.isEmpty(feedPosts)}"
+                 class="text-center text-muted py-5">
+                <i class="bi bi-file-post fs-2 d-block mb-2"></i>
+                <p>No posts yet. Browse providers to find someone.</p>
+                <a th:href="@{/providers}"
+                   class="btn btn-primary btn-sm">Browse providers</a>
+            </div>
+
+            <div th:each="post : ${feedPosts}" class="card mb-4">
+                <div class="card-header bg-transparent d-flex
+                align-items-center gap-3 py-2">
+                    <img th:if="${post.provider.profilePicturePath != null}"
+                         th:src="@{/{p}(p=${post.provider.profilePicturePath})}"
+                         th:alt="${post.provider.firstName}"
+                         class="rounded-circle"
+                         style="width:38px;height:38px;object-fit:cover;"/>
+                    <div th:unless="${post.provider.profilePicturePath != null}"
+                         class="bg-secondary rounded-circle d-flex
+                    align-items-center justify-content-center flex-shrink-0"
+                         style="width:38px;height:38px;">
+                        <i class="bi bi-person-fill text-white small"
+                           aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <a th:href="@{/providers/{id}(id=${post.provider.id})}"
+                           class="fw-semibold text-decoration-none"
+                           th:text="${post.provider.firstName + ' ' +
+                          post.provider.lastName}"></a>
+                        <div class="text-muted small"
+                             th:text="${#temporals.format(post.createdAt,
+                          'dd MMM yyyy HH:mm')}"></div>
+                    </div>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(post.postMediaList)}">
+                    <img th:if="${post.postMediaList[0].mediaAsset
+                      .mediaType.name() == 'IMAGE'}"
+                         th:src="@{/{p}(p=${post.postMediaList[0]
+                             .mediaAsset.filePath})}"
+                         class="card-img-top feed-post-img"
+                         style="max-height:400px;object-fit:cover;cursor:pointer;"
+                         th:alt="${post.postMediaList[0].mediaAsset.altText}"
+                         onclick="openFeedImage(this.src)"/>
+                    <video th:if="${post.postMediaList[0].mediaAsset
+                       .mediaType.name() == 'VIDEO'}"
+                           th:src="@{/{p}(p=${post.postMediaList[0]
+                               .mediaAsset.filePath})}"
+                           class="w-100"
+                           style="max-height:400px;object-fit:cover;"
+                           controls></video>
+                    <div th:if="${#lists.size(post.postMediaList) > 1}"
+                         class="row g-1 p-2">
+                        <div class="col-4"
+                             th:each="pm, stat : ${post.postMediaList}"
+                             th:if="${stat.index > 0 and stat.index < 4}">
+                            <img th:if="${pm.mediaAsset.mediaType.name() == 'IMAGE'}"
+                                 th:src="@{/{p}(p=${pm.mediaAsset.filePath})}"
+                                 class="img-fluid rounded feed-post-img"
+                                 style="height:80px;width:100%;object-fit:cover;cursor:pointer;"
+                                 th:alt="${pm.mediaAsset.altText}"
+                                 onclick="openFeedImage(this.src)"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body"
+                     th:if="${post.contentText != null
+                  and !post.contentText.isEmpty()}">
+                    <p class="mb-0" th:text="${post.contentText}"></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="feedImgModal" tabindex="-1"
+     aria-label="Post image">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0 d-flex
+                        align-items-center justify-content-center"
+                 style="min-height:40vh;">
+                <img id="feedImgSrc" src="" alt="Post image"
+                     class="img-fluid"
+                     style="max-height:80vh;object-fit:contain;"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function openFeedImage(src) {
+            document.getElementById('feedImgSrc').src = src;
+            new bootstrap.Modal(document.getElementById('feedImgModal')).show();
+        }
+    </script>
+</th:block>
+</body>
+</html>

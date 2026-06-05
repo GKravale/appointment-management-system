@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Schedule</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"
+            th:text="${provider.firstName + ' ' + provider.lastName + ' schedule'}"></h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#bookModal">
+                <i class="bi bi-calendar-plus me-1"></i>Book appointment
+            </button>
+            <a th:href="@{/admin/schedule}" class="btn btn-sm btn-outline-secondary">
+                All providers
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-auto">
+            <small><span class="badge" style="background:#ffc107">&#9632;</span> Requested</small>
+        </div>
+        <div class="col-auto">
+            <small><span class="badge bg-primary">&#9632;</span> Confirmed</small>
+        </div>
+        <div class="col-auto">
+            <small><span class="badge bg-success">&#9632;</span> Completed</small>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div id="adminCalendar"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="bookModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Book appointment</h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/schedule/{id}/book(id=${provider.id})}"
+                      method="post" id="bookForm">
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Client</label>
+                            <select name="clientUserId" class="form-select" required>
+                                <option value="">Select a client...</option>
+                                <option th:each="clientUser : ${clients}"
+                                        th:value="${clientUser.id}"
+                                        th:text="${clientUser.person.firstName + ' '
+                                                   + clientUser.person.lastName
+                                                   + ' (' + clientUser.email + ')'}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Service</label>
+                            <select name="providerServiceOfferingId" id="serviceSelect"
+                                    class="form-select" required>
+                                <option value="">Select a service...</option>
+                                <option th:each="svc : ${services}"
+                                        th:value="${svc.id}"
+                                        th:text="${svc.serviceOffering.title + ' (' + (svc.durationOverride != null ?
+                                        svc.durationOverride : svc.serviceOffering.defaultDuration) + ' min)'}">
+                                </option>
+                            </select>
+
+                            <label class="form-label fw-semibold">Date</label>
+                            <input type="date" id="slotDate" class="form-control"
+                                   min="1" required/>
+                        </div>
+
+                        <div class="mb-3" id="slotGroup" style="display:none;">
+                            <label class="form-label fw-semibold">Available slots</label>
+                            <select name="startTime" id="slotSelect"
+                                    class="form-select" required>
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes (optional)</label>
+                            <textarea name="clientNotes" class="form-control"
+                                      rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">Book</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="appointmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Appointment details</h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+                <div class="modal-footer" id="modalFooter"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<th:block layout:fragment="scripts">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
+          rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js">
+    </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const providerId = /*[[${provider.id}]]*/ 0;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendar = new FullCalendar.Calendar(
+                document.getElementById('adminCalendar'), {
+                    initialView: 'timeGridWeek',
+                    firstDay: 1,
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    height: 'auto',
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '22:00:00',
+                    allDaySlot: false,
+                    events: '/admin/schedule/' + providerId + '/events',
+                    eventClick: function (info) {
+                        const props = info.event.extendedProps;
+                        const start = info.event.start.toLocaleString('en-GB', {
+                            weekday: 'long', day: 'numeric', month: 'long',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                        const end = info.event.end ?
+                            info.event.end.toLocaleTimeString('en-GB',
+                                {hour: '2-digit', minute: '2-digit'}) : '';
+                        document.getElementById('modalBody').innerHTML =
+                            '<p><strong>' + info.event.title + '</strong></p>' +
+                            '<p class="text-muted mb-1">' + start +
+                            (end ? ' – ' + end : '') + '</p>' +
+                            '<span class="badge bg-secondary">' + props.status + '</span>';
+                        document.getElementById('modalFooter').innerHTML = '';
+                        new bootstrap.Modal(
+                            document.getElementById('appointmentModal')
+                        ).show();
+                    }
+                });
+            calendar.render();
+
+            const serviceSelect = document.getElementById('serviceSelect');
+            const slotDate = document.getElementById('slotDate');
+            const slotSelect = document.getElementById('slotSelect');
+            const slotGroup = document.getElementById('slotGroup');
+
+            function loadSlots() {
+                const serviceId = serviceSelect.value;
+                const date = slotDate.value;
+                if (!serviceId || !date) return;
+
+                slotGroup.style.display = 'none';
+                slotSelect.innerHTML = '<option value="">Loading...</option>';
+
+                fetch('/admin/schedule/' + providerId + '/slots?serviceId='
+                    + serviceId + '&date=' + date)
+                    .then(r => r.json())
+                    .then(slots => {
+                        slotSelect.innerHTML = slots.length === 0
+                            ? '<option value="">No slots available</option>'
+                            : '<option value="">Pick a time...</option>';
+                        slots.forEach(function (s) {
+                            const time = new Date(s.extendedProps.startTime)
+                                .toLocaleTimeString('en-GB',
+                                    {hour: '2-digit', minute: '2-digit'});
+                            const opt = document.createElement('option');
+                            opt.value = s.extendedProps.startTime;
+                            opt.textContent = time;
+                            slotSelect.appendChild(opt);
+                        });
+                        slotGroup.style.display = '';
+                    });
+            }
+
+            serviceSelect.addEventListener('change', loadSlots);
+            slotDate.addEventListener('change', loadSlots);
+
+            slotDate.min = new Date().toISOString().split('T')[0];
+        });
+        /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,220 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ServiceOfferingController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: ServiceOfferingController (com.appointment.system.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ServiceOfferingController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    14.3%
+  </span>
+  <span class="absValue">
+    (1/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2.3%
+  </span>
+  <span class="absValue">
+    (1/44)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.controller;
+&nbsp;
+&nbsp;import com.appointment.system.dto.request.CreateServiceOfferingRequest;
+&nbsp;import com.appointment.system.dto.response.ProviderServiceOfferingResponse;
+&nbsp;import com.appointment.system.entity.ProviderServiceOffering;
+&nbsp;import com.appointment.system.enums.BookingType;
+&nbsp;import com.appointment.system.repository.ProviderServiceOfferingRepository;
+&nbsp;import com.appointment.system.security.CustomUserDetails;
+&nbsp;import com.appointment.system.service.ServiceOfferingService;
+&nbsp;import jakarta.persistence.EntityNotFoundException;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.jspecify.annotations.NonNull;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.stereotype.Controller;
+&nbsp;import org.springframework.ui.Model;
+&nbsp;import org.springframework.validation.BindingResult;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Controller
+&nbsp;@RequestMapping(&quot;/provider/services&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class ServiceOfferingController {
+&nbsp;
+&nbsp;    private final ServiceOfferingService serviceOfferingService;
+&nbsp;    private final ProviderServiceOfferingRepository providerServiceOfferingRepository;
+&nbsp;
+&nbsp;    @GetMapping
+&nbsp;    public String listServices(@AuthenticationPrincipal CustomUserDetails user, Model model) {
+<b class="nc">&nbsp;        model.addAttribute(&quot;services&quot;, serviceOfferingService.getProviderOfferings(user.getPersonId()));</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;createRequest&quot;, new CreateServiceOfferingRequest());</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;categories&quot;, serviceOfferingService.getAllCategories());</b>
+<b class="nc">&nbsp;        return &quot;provider/services&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/create&quot;)
+&nbsp;    public String createService(@AuthenticationPrincipal CustomUserDetails user, @Valid @ModelAttribute(
+&nbsp;                                        &quot;createRequest&quot;) CreateServiceOfferingRequest request,
+&nbsp;                                BindingResult bindingResult, Model model,
+&nbsp;                                RedirectAttributes redirectAttributes) {
+<b class="nc">&nbsp;        if (bindingResult.hasErrors()) {</b>
+<b class="nc">&nbsp;            model.addAttribute(&quot;services&quot;,</b>
+<b class="nc">&nbsp;                    serviceOfferingService.getProviderOfferings(user.getPersonId()));</b>
+<b class="nc">&nbsp;            model.addAttribute(&quot;categories&quot;,</b>
+<b class="nc">&nbsp;                    serviceOfferingService.getAllCategories());</b>
+<b class="nc">&nbsp;            return &quot;provider/services&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        serviceOfferingService.createAndAssign(user.getPersonId(), request);</b>
+<b class="nc">&nbsp;        redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Service added successfully&quot;);</b>
+<b class="nc">&nbsp;        log.info(&quot;Provider {} created a new service offering: {}&quot;, user.getPersonId(), request.getTitle());</b>
+<b class="nc">&nbsp;        return &quot;redirect:/provider/services&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/edit/{id}&quot;)
+&nbsp;    public String editPage(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user, Model model) {
+<b class="nc">&nbsp;        ProviderServiceOffering offering = providerServiceOfferingRepository.findById(id)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Not found&quot;));</b>
+<b class="nc">&nbsp;        CreateServiceOfferingRequest form = getCreateServiceOfferingRequest(offering);</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;editRequest&quot;, form);</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;serviceId&quot;, id);</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;categories&quot;, serviceOfferingService.getAllCategories());</b>
+<b class="nc">&nbsp;        model.addAttribute(&quot;bookingTypes&quot;, BookingType.values());</b>
+<b class="nc">&nbsp;        return &quot;provider/service-edit&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static @NonNull CreateServiceOfferingRequest getCreateServiceOfferingRequest(ProviderServiceOffering offering) {
+<b class="nc">&nbsp;        CreateServiceOfferingRequest form = new CreateServiceOfferingRequest();</b>
+<b class="nc">&nbsp;        form.setTitle(offering.getServiceOffering().getTitle());</b>
+<b class="nc">&nbsp;        form.setDescription(offering.getServiceOffering().getDescription());</b>
+<b class="nc">&nbsp;        form.setDefaultDuration(offering.getServiceOffering().getDefaultDuration());</b>
+<b class="nc">&nbsp;        form.setPriceEstimate(offering.getServiceOffering().getPriceEstimate());</b>
+<b class="nc">&nbsp;        form.setCategory(offering.getServiceOffering().getCategory());</b>
+<b class="nc">&nbsp;        form.setBufferMinutes(offering.getBufferMinutes());</b>
+<b class="nc">&nbsp;        form.setBookingType(offering.getServiceOffering().getBookingType());</b>
+<b class="nc">&nbsp;        return form;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/edit/{id}&quot;)
+&nbsp;    public String updateService(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user,
+&nbsp;                                @Valid @ModelAttribute(&quot;editRequest&quot;) CreateServiceOfferingRequest request,
+&nbsp;                                BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
+<b class="nc">&nbsp;        if (bindingResult.hasErrors()) {</b>
+<b class="nc">&nbsp;            model.addAttribute(&quot;serviceId&quot;, id);</b>
+<b class="nc">&nbsp;            model.addAttribute(&quot;categories&quot;, serviceOfferingService.getAllCategories());</b>
+<b class="nc">&nbsp;            return &quot;provider/service-edit&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        serviceOfferingService.update(id, user.getPersonId(), request);</b>
+<b class="nc">&nbsp;        redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Service updated&quot;);</b>
+<b class="nc">&nbsp;        log.info(&quot;Provider {} updated service offering {}&quot;, user.getPersonId(), id);</b>
+<b class="nc">&nbsp;        return &quot;redirect:/provider/services&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/deactivate/{id}&quot;)
+&nbsp;    public String deactivateService(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user,
+&nbsp;                                    RedirectAttributes redirectAttributes) {
+<b class="nc">&nbsp;        serviceOfferingService.deactivate(id, user.getPersonId());</b>
+<b class="nc">&nbsp;        redirectAttributes.addFlashAttribute(&quot;successMessage&quot;, &quot;Service removed&quot;);</b>
+<b class="nc">&nbsp;        log.info(&quot;Provider {} removed service offering {}&quot;, user.getPersonId(), id);</b>
+<b class="nc">&nbsp;        return &quot;redirect:/provider/services&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Provider Dashboard</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Welcome back, <span th:text="${username}"></span></h2>
+        <a th:href="@{/provider/schedule}" class="btn btn-primary btn-sm">
+            <i class="bi bi-calendar3 me-1"></i>Open schedule
+        </a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body py-4">
+                    <div class="fs-1 fw-bold text-warning"
+                         th:text="${pendingCount}">0</div>
+                    <div class="text-muted small">Pending requests</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body py-4">
+                    <div class="fs-1 fw-bold text-primary"
+                         th:text="${todayCount}">0</div>
+                    <div class="text-muted small">Appointments today</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Pending requests</h6>
+                    <a th:href="@{/provider/appointments}"
+                       class="btn btn-sm btn-outline-primary">View all</a>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(recentAppointments)}"
+                         class="text-muted text-center py-4">
+                        No pending requests.
+                    </div>
+                    <div th:each="apt : ${recentAppointments}"
+                         class="d-flex justify-content-between align-items-center
+                                px-3 py-2 border-bottom">
+                        <div>
+                            <span class="fw-semibold"
+                                  th:text="${apt.clientFirstName + ' ' +
+                                            apt.clientLastName}"></span>
+                            <span class="text-muted small ms-2"
+                                  th:text="${apt.serviceTitleSnapshot}"></span>
+                            <div class="text-muted small">
+                                <span th:text="${#temporals.format(apt.startTime,
+                                               'EEE dd MMM HH:mm')}"></span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <form th:action="@{/provider/appointments/{id}/confirm
+                                             (id=${apt.id})}" method="post">
+                                <button class="btn btn-success btn-sm">Confirm</button>
+                            </form>
+                            <form th:action="@{/provider/appointments/{id}/decline
+                                             (id=${apt.id})}" method="post">
+                                <button class="btn btn-outline-danger btn-sm">Decline</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick links</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a th:href="@{/provider/services}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-scissors me-2"></i>Manage services
+                    </a>
+                    <a th:href="@{/provider/availability}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-clock me-2"></i>Set availability
+                    </a>
+                    <a th:href="@{/provider/profile}"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-person-badge me-2"></i>Edit profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4" th:unless="${#lists.isEmpty(recentPosts)}">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Recent posts</h5>
+            <a th:href="@{/provider/posts}"
+               class="btn btn-sm btn-outline-primary">All posts</a>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4" th:each="post : ${recentPosts}">
+                <a th:href="@{/provider/posts/{id}(id=${post.id})}"
+                   class="card h-100 text-decoration-none">
+                    <img th:if="${!#lists.isEmpty(post.postMediaList) and
+                      post.postMediaList[0].mediaAsset.mediaType.name()
+                      == 'IMAGE'}"
+                         th:src="@{/{p}(p=${post.postMediaList[0].mediaAsset.filePath})}"
+                         class="card-img-top"
+                         style="height:160px;object-fit:cover;"
+                         alt="Post image"/>
+                    <div class="card-body">
+                        <p class="card-text small"
+                           th:text="${post.contentText != null and
+                          post.contentText.length() > 80
+                          ? post.contentText.substring(0, 80) + '...'
+                          : (post.contentText ?: 'Image post')}"></p>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(post.createdAt,
+                            'dd MMM yyyy')}"></small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

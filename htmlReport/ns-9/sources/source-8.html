@@ -1,0 +1,257 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ProviderService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ProviderService (com.appointment.system.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProviderService</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (4/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    48.5%
+  </span>
+  <span class="absValue">
+    (33/68)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52.5%
+  </span>
+  <span class="absValue">
+    (32/61)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ProviderService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (4/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    48.5%
+  </span>
+  <span class="absValue">
+    (33/68)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52.5%
+  </span>
+  <span class="absValue">
+    (32/61)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.service;
+&nbsp;
+&nbsp;import com.appointment.system.dto.request.UpdateProviderProfileRequest;
+&nbsp;import com.appointment.system.dto.response.ProviderProfileResponse;
+&nbsp;import com.appointment.system.dto.response.ProviderServiceOfferingResponse;
+&nbsp;import com.appointment.system.entity.Provider;
+&nbsp;import com.appointment.system.enums.ServiceCategory;
+&nbsp;import com.appointment.system.repository.ProviderRepository;
+&nbsp;import com.appointment.system.repository.ProviderServiceOfferingRepository;
+&nbsp;import jakarta.persistence.EntityNotFoundException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.file.Files;
+&nbsp;import java.nio.file.Path;
+&nbsp;import java.nio.file.Paths;
+&nbsp;import java.util.List;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;public class ProviderService {
+&nbsp;
+&nbsp;    private final ProviderRepository providerRepository;
+&nbsp;    private final ProviderServiceOfferingRepository providerServiceOfferingRepository;
+&nbsp;
+&nbsp;    @Value(&quot;${app.upload.dir:uploads}&quot;)
+&nbsp;    String uploadDir;
+&nbsp;
+&nbsp;    public ProviderProfileResponse getProfile(Long personId) {
+<b class="fc">&nbsp;        Provider provider = providerRepository.findById(personId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider not found&quot;));</b>
+<b class="pc">&nbsp;        return toResponse(provider);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void updateProfile(Long personId, UpdateProviderProfileRequest request) {
+<b class="pc">&nbsp;        Provider provider = providerRepository.findById(personId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider not found&quot;));</b>
+<b class="fc">&nbsp;        provider.setFirstName(request.getFirstName());</b>
+<b class="fc">&nbsp;        provider.setLastName(request.getLastName());</b>
+<b class="fc">&nbsp;        provider.setPhoneNr(request.getPhoneNr());</b>
+<b class="fc">&nbsp;        provider.setLocation(request.getLocation());</b>
+<b class="nc">&nbsp;        provider.setBio(request.getBio());</b>
+<b class="fc">&nbsp;        provider.setCancellationHoursLimit(request.getCancellationHoursLimit());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional(rollbackFor = IOException.class)
+&nbsp;    public void uploadProfilePicture(Long personId, MultipartFile file) throws IOException {
+<b class="pc">&nbsp;        if (file.isEmpty()) throw new IllegalArgumentException(&quot;Please select a file&quot;);</b>
+<b class="fc">&nbsp;        String contentType = file.getContentType();</b>
+<b class="fc">&nbsp;        if (contentType == null || !contentType.startsWith(&quot;image/&quot;)) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Only image files are allowed&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Provider provider = providerRepository.findById(personId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider not found&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        String extension = &quot;&quot;;</b>
+<b class="fc">&nbsp;        String originalName = file.getOriginalFilename();</b>
+<b class="fc">&nbsp;        if (originalName != null &amp;&amp; originalName.contains(&quot;.&quot;)) {</b>
+<b class="fc">&nbsp;            extension = originalName.substring(originalName.lastIndexOf(&quot;.&quot;));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String filename = UUID.randomUUID() + extension;</b>
+<b class="fc">&nbsp;        Path uploadPath = Paths.get(uploadDir, &quot;profiles&quot;);</b>
+<b class="fc">&nbsp;        Files.createDirectories(uploadPath);</b>
+<b class="fc">&nbsp;        Files.copy(file.getInputStream(), uploadPath.resolve(filename),</b>
+&nbsp;                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+&nbsp;
+<b class="fc">&nbsp;        provider.setProfilePicturePath(&quot;uploads/profiles/&quot; + filename);</b>
+<b class="fc">&nbsp;        providerRepository.save(provider);</b>
+<b class="fc">&nbsp;        log.info(&quot;Profile picture saved for provider {}: {}&quot;, personId, filename);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ProviderProfileResponse toResponse(Provider provider) {
+<b class="fc">&nbsp;        ProviderProfileResponse response = new ProviderProfileResponse();</b>
+<b class="fc">&nbsp;        response.setId(provider.getId());</b>
+<b class="fc">&nbsp;        response.setFirstName(provider.getFirstName());</b>
+<b class="fc">&nbsp;        response.setLastName(provider.getLastName());</b>
+<b class="fc">&nbsp;        response.setPhoneNr(provider.getPhoneNr());</b>
+<b class="nc">&nbsp;        response.setLocation(provider.getLocation());</b>
+<b class="nc">&nbsp;        response.setBio(provider.getBio());</b>
+<b class="nc">&nbsp;        response.setIsActive(provider.getIsActive());</b>
+<b class="nc">&nbsp;        response.setProfilePicturePath(provider.getProfilePicturePath());</b>
+<b class="nc">&nbsp;        response.setCancellationHoursLimit(provider.getCancellationHoursLimit());</b>
+<b class="nc">&nbsp;        response.setServiceOfferings(providerServiceOfferingRepository</b>
+<b class="nc">&nbsp;                .findByProviderAndIsActiveTrueAndIsDeletedFalse(provider)</b>
+<b class="nc">&nbsp;                .stream()</b>
+<b class="nc">&nbsp;                .map(ProviderServiceOfferingResponse::from)</b>
+<b class="nc">&nbsp;                .toList());</b>
+<b class="nc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;ProviderProfileResponse&gt; getAllActiveProviders() {
+<b class="nc">&nbsp;        return providerRepository.findByIsActiveTrueAndIsDeletedFalse()</b>
+<b class="nc">&nbsp;                .stream()</b>
+<b class="nc">&nbsp;                .map(this::toResponse)</b>
+<b class="nc">&nbsp;                .toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;ProviderProfileResponse&gt; getActiveProvidersByCategory(ServiceCategory category) {
+<b class="nc">&nbsp;        return providerRepository.findByIsActiveTrueAndIsDeletedFalse()</b>
+<b class="nc">&nbsp;                .stream()</b>
+<b class="nc">&nbsp;                .filter(p -&gt; providerServiceOfferingRepository</b>
+<b class="nc">&nbsp;                        .findByProviderAndIsActiveTrueAndIsDeletedFalse(p)</b>
+<b class="nc">&nbsp;                        .stream()</b>
+<b class="nc">&nbsp;                        .anyMatch(providerServiceOffering -&gt; providerServiceOffering</b>
+<b class="nc">&nbsp;                                .getServiceOffering().getCategory() == category))</b>
+<b class="nc">&nbsp;                .map(this::toResponse)</b>
+<b class="nc">&nbsp;                .toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ProviderProfileResponse getPublicProfile(Long providerId) {
+<b class="nc">&nbsp;        Provider provider = providerRepository.findById(providerId)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider not found&quot;));</b>
+<b class="nc">&nbsp;        return toResponse(provider);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

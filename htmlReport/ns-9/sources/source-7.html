@@ -1,0 +1,288 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PostService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.service</a>
+</div>
+
+<h1>Coverage Summary for Class: PostService (com.appointment.system.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PostService</td>
+<td class="coverageStat">
+  <span class="percent">
+    46.2%
+  </span>
+  <span class="absValue">
+    (6/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55.3%
+  </span>
+  <span class="absValue">
+    (42/76)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40.6%
+  </span>
+  <span class="absValue">
+    (28/69)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PostService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    46.2%
+  </span>
+  <span class="absValue">
+    (6/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55.3%
+  </span>
+  <span class="absValue">
+    (42/76)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40.6%
+  </span>
+  <span class="absValue">
+    (28/69)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.service;
+&nbsp;
+&nbsp;import com.appointment.system.entity.*;
+&nbsp;import com.appointment.system.enums.MediaType;
+&nbsp;import com.appointment.system.repository.*;
+&nbsp;import jakarta.persistence.EntityNotFoundException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.file.*;
+&nbsp;import java.util.*;
+&nbsp;
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class PostService {
+&nbsp;
+&nbsp;    private final PostRepository postRepository;
+&nbsp;    private final MediaAssetRepository mediaAssetRepository;
+&nbsp;    private final ProviderRepository providerRepository;
+&nbsp;    private final PortfolioRepository portfolioRepository;
+&nbsp;
+&nbsp;    @Value(&quot;${app.upload.dir:uploads}&quot;)
+&nbsp;    private String uploadDir;
+&nbsp;
+<b class="nc">&nbsp;    private static final List&lt;String&gt; ALLOWED_TYPES = List.of(&quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/webp&quot;, &quot;image/gif&quot;,</b>
+&nbsp;            &quot;image/svg+xml&quot;, &quot;video/mp4&quot;, &quot;video/webm&quot;, &quot;video/ogg&quot;);
+&nbsp;
+&nbsp;    public List&lt;Post&gt; getProviderPosts(Long providerPersonId) {
+<b class="fc">&nbsp;        Provider provider =</b>
+<b class="fc">&nbsp;                providerRepository.findById(providerPersonId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider&quot; +</b>
+&nbsp;                        &quot; not found&quot;));
+<b class="fc">&nbsp;        log.info(&quot;Retrieving posts for provider {}&quot;, providerPersonId);</b>
+<b class="fc">&nbsp;        return postRepository.findByProviderAndIsDeletedFalse(provider);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Post getById(Long postId) {
+<b class="fc">&nbsp;        return postRepository.findById(postId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Post not found&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;Post&gt; getAllRecentPosts(int limit) {
+<b class="nc">&nbsp;        return postRepository.findByIsDeletedFalseOrderByCreatedAtDesc()</b>
+<b class="fc">&nbsp;                .stream().limit(limit).toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void createPost(Long providerPersonId, String contentText, List&lt;MultipartFile&gt; files,
+&nbsp;                           List&lt;Long&gt; portfolioAssetIds, boolean addToPortfolio) throws IOException {
+&nbsp;
+<b class="pc">&nbsp;        Provider provider =</b>
+<b class="fc">&nbsp;                providerRepository.findById(providerPersonId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider&quot; +</b>
+&nbsp;                        &quot; not found&quot;));
+&nbsp;
+<b class="fc">&nbsp;        Post post = new Post();</b>
+<b class="nc">&nbsp;        post.setProvider(provider);</b>
+<b class="nc">&nbsp;        post.setContentText(contentText);</b>
+<b class="nc">&nbsp;        post.setPostMediaList(new ArrayList&lt;&gt;());</b>
+<b class="nc">&nbsp;        postRepository.save(post);</b>
+&nbsp;
+<b class="fc">&nbsp;        Portfolio portfolio = getOrCreatePortfolio(provider);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (files != null) {</b>
+<b class="fc">&nbsp;            attachUploadedFiles(post, files, portfolio, addToPortfolio);</b>
+&nbsp;        }
+&nbsp;
+<b class="pc">&nbsp;        if (portfolioAssetIds != null) {</b>
+<b class="fc">&nbsp;            attachPortfolioAssets(post, portfolioAssetIds);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        postRepository.save(post);</b>
+<b class="fc">&nbsp;        log.info(&quot;Post created by provider {}&quot;, providerPersonId);</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void deletePost(Long postId, Long providerPersonId) {
+<b class="fc">&nbsp;        Post post = postRepository.findById(postId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Post not found&quot;));</b>
+<b class="pc">&nbsp;        if (!post.getProvider().getId().equals(providerPersonId)) {</b>
+<b class="fc">&nbsp;            throw new SecurityException(&quot;Not authorized&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        post.setIsDeleted(true);</b>
+<b class="fc">&nbsp;        log.info(&quot;Post {} soft-deleted by provider {}&quot;, postId, providerPersonId);</b>
+<b class="pc">&nbsp;    }</b>
+&nbsp;
+&nbsp;
+&nbsp;    private void attachUploadedFiles(Post post, List&lt;MultipartFile&gt; files, Portfolio portfolio,
+&nbsp;                                     boolean addToPortfolio) throws IOException {
+<b class="nc">&nbsp;        int order = post.getPostMediaList().size();</b>
+<b class="pc">&nbsp;        for (MultipartFile file : files) {</b>
+<b class="fc">&nbsp;            String contentType = file.getContentType();</b>
+<b class="nc">&nbsp;            if (file.isEmpty() || !isSupportedMediaType(contentType)) {</b>
+&nbsp;                continue;
+&nbsp;            }
+<b class="fc">&nbsp;            MediaAsset asset = saveFileAndCreateAsset(file, contentType, portfolio);</b>
+<b class="pc">&nbsp;            if (addToPortfolio &amp;&amp; contentType.startsWith(&quot;image/&quot;)) {</b>
+<b class="fc">&nbsp;                asset.setPortfolio(portfolio);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            mediaAssetRepository.save(asset);</b>
+&nbsp;
+<b class="nc">&nbsp;            PostMedia postMedia = new PostMedia();</b>
+<b class="nc">&nbsp;            postMedia.setPost(post);</b>
+<b class="nc">&nbsp;            postMedia.setMediaAsset(asset);</b>
+<b class="nc">&nbsp;            postMedia.setSortOrder(order++);</b>
+<b class="nc">&nbsp;            post.getPostMediaList().add(postMedia);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private MediaAsset saveFileAndCreateAsset(MultipartFile file, String contentType, Portfolio portfolio) throws IOException {
+<b class="nc">&nbsp;        String extension = &quot;&quot;;</b>
+<b class="nc">&nbsp;        String originalName = file.getOriginalFilename();</b>
+<b class="nc">&nbsp;        if (originalName != null &amp;&amp; originalName.contains(&quot;.&quot;)) {</b>
+<b class="nc">&nbsp;            extension = originalName.substring(originalName.lastIndexOf(&quot;.&quot;));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String filename = UUID.randomUUID() + extension;</b>
+<b class="nc">&nbsp;        Path uploadPath = Paths.get(uploadDir, &quot;posts&quot;);</b>
+<b class="nc">&nbsp;        Files.createDirectories(uploadPath);</b>
+<b class="nc">&nbsp;        Files.copy(file.getInputStream(), uploadPath.resolve(filename));</b>
+&nbsp;
+<b class="nc">&nbsp;        MediaAsset asset = new MediaAsset();</b>
+<b class="nc">&nbsp;        asset.setPortfolio(portfolio);</b>
+<b class="nc">&nbsp;        asset.setFilePath(&quot;uploads/posts/&quot; + filename);</b>
+<b class="nc">&nbsp;        asset.setMediaType(contentType.startsWith(&quot;video/&quot;) ? MediaType.VIDEO : MediaType.IMAGE);</b>
+<b class="nc">&nbsp;        return asset;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void attachPortfolioAssets(Post post, List&lt;Long&gt; portfolioAssetIds) {
+<b class="nc">&nbsp;        for (Long assetId : portfolioAssetIds) {</b>
+<b class="nc">&nbsp;            mediaAssetRepository.findById(assetId).ifPresent(asset -&gt; {</b>
+<b class="nc">&nbsp;                PostMedia postMedia = new PostMedia();</b>
+<b class="nc">&nbsp;                postMedia.setPost(post);</b>
+<b class="nc">&nbsp;                postMedia.setMediaAsset(asset);</b>
+<b class="nc">&nbsp;                postMedia.setSortOrder(post.getPostMediaList().size());</b>
+<b class="nc">&nbsp;                post.getPostMediaList().add(postMedia);</b>
+&nbsp;            });
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private Portfolio getOrCreatePortfolio(Provider provider) {
+<b class="nc">&nbsp;        return portfolioRepository.findByProvider(provider).orElseGet(() -&gt; {</b>
+<b class="nc">&nbsp;            Portfolio portfolio = new Portfolio();</b>
+<b class="nc">&nbsp;            portfolio.setProvider(provider);</b>
+<b class="nc">&nbsp;            portfolio.setTitle(provider.getFirstName() + &quot;&#39;s Portfolio&quot;);</b>
+<b class="nc">&nbsp;            return portfolioRepository.save(portfolio);</b>
+&nbsp;        });
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isSupportedMediaType(String contentType) {
+<b class="nc">&nbsp;        return contentType != null &amp;&amp; ALLOWED_TYPES.contains(contentType);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>

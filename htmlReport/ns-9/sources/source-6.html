@@ -1,0 +1,234 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PortfolioService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.appointment.system.service</a>
+</div>
+
+<h1>Coverage Summary for Class: PortfolioService (com.appointment.system.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PortfolioService</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    48%
+  </span>
+  <span class="absValue">
+    (24/50)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (42/45)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PortfolioService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    48%
+  </span>
+  <span class="absValue">
+    (24/50)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (42/45)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.appointment.system.service;
+&nbsp;
+&nbsp;import com.appointment.system.entity.*;
+&nbsp;import com.appointment.system.enums.MediaType;
+&nbsp;import com.appointment.system.repository.*;
+&nbsp;import jakarta.persistence.EntityNotFoundException;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.file.*;
+&nbsp;import java.util.*;
+&nbsp;
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class PortfolioService {
+&nbsp;
+&nbsp;    private final PortfolioRepository portfolioRepository;
+&nbsp;    private final MediaAssetRepository mediaAssetRepository;
+&nbsp;    private final ProviderRepository providerRepository;
+&nbsp;
+&nbsp;    @Value(&quot;${app.upload.dir:uploads}&quot;)
+&nbsp;    private String uploadDir;
+&nbsp;
+<b class="nc">&nbsp;    private static final List&lt;String&gt; ALLOWED_IMAGE_TYPES = List.of(</b>
+&nbsp;            &quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/webp&quot;, &quot;image/gif&quot;, &quot;image/svg+xml&quot;);
+&nbsp;
+&nbsp;    public Portfolio getOrCreatePortfolio(Long providerPersonId) {
+<b class="pc">&nbsp;        log.debug(&quot;Getting or creating portfolio for provider {}&quot;, providerPersonId);</b>
+<b class="fc">&nbsp;        Provider provider = providerRepository.findById(providerPersonId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Provider not found&quot;));</b>
+<b class="pc">&nbsp;        return portfolioRepository.findByProvider(provider).orElseGet(() -&gt; {</b>
+<b class="fc">&nbsp;            Portfolio p = new Portfolio();</b>
+<b class="fc">&nbsp;            p.setProvider(provider);</b>
+<b class="fc">&nbsp;            p.setTitle(provider.getFirstName() + &quot;&#39;s Portfolio&quot;);</b>
+<b class="fc">&nbsp;            return portfolioRepository.save(p);</b>
+&nbsp;        });
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;MediaAsset&gt; getPortfolioAssets(Long providerPersonId) {
+<b class="pc">&nbsp;        log.debug(&quot;Retrieving portfolio assets for provider {}&quot;, providerPersonId);</b>
+<b class="fc">&nbsp;        Portfolio portfolio = getOrCreatePortfolio(providerPersonId);</b>
+<b class="pc">&nbsp;        return mediaAssetRepository.findByPortfolioAndInPortfolioTrue(portfolio);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void uploadMedia(Long providerPersonId, MultipartFile file, String altText) throws IOException {
+<b class="pc">&nbsp;        if (file.isEmpty()) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Please select a file&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String contentType = file.getContentType();</b>
+<b class="fc">&nbsp;        if (!ALLOWED_IMAGE_TYPES.contains(contentType)) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;Only JPG, PNG, WebP, GIF and SVG images are allowed in portfolio&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Portfolio portfolio = getOrCreatePortfolio(providerPersonId);</b>
+&nbsp;
+<b class="fc">&nbsp;        String extension = &quot;&quot;;</b>
+<b class="fc">&nbsp;        String originalName = file.getOriginalFilename();</b>
+<b class="pc">&nbsp;        if (originalName != null &amp;&amp; originalName.contains(&quot;.&quot;)) {</b>
+<b class="fc">&nbsp;            extension = originalName.substring(originalName.lastIndexOf(&quot;.&quot;));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String filename = UUID.randomUUID() + extension;</b>
+&nbsp;
+<b class="fc">&nbsp;        Path uploadPath = Paths.get(uploadDir, &quot;portfolio&quot;);</b>
+<b class="fc">&nbsp;        Files.createDirectories(uploadPath);</b>
+<b class="fc">&nbsp;        Files.copy(file.getInputStream(), uploadPath.resolve(filename));</b>
+&nbsp;
+<b class="fc">&nbsp;        MediaAsset asset = new MediaAsset();</b>
+<b class="fc">&nbsp;        asset.setPortfolio(portfolio);</b>
+<b class="fc">&nbsp;        asset.setFilePath(&quot;uploads/portfolio/&quot; + filename);</b>
+<b class="fc">&nbsp;        asset.setMediaType(MediaType.IMAGE);</b>
+<b class="fc">&nbsp;        asset.setAltText(altText);</b>
+<b class="fc">&nbsp;        asset.setInPortfolio(true);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Portfolio image uploaded for provider {}: {}&quot;, providerPersonId, filename);</b>
+<b class="fc">&nbsp;        mediaAssetRepository.save(asset);</b>
+<b class="pc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void deleteMedia(Long mediaAssetId, Long providerPersonId) {
+<b class="pc">&nbsp;        MediaAsset asset = mediaAssetRepository.findById(mediaAssetId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;Media not found&quot;));</b>
+<b class="fc">&nbsp;        if (!asset.getPortfolio().getProvider().getId().equals(providerPersonId)) {</b>
+<b class="fc">&nbsp;            throw new SecurityException(&quot;Not authorized&quot;);</b>
+&nbsp;        }
+&nbsp;        try {
+<b class="fc">&nbsp;            Files.deleteIfExists(Paths.get(asset.getFilePath()));</b>
+&nbsp;        } catch (IOException e) {
+<b class="nc">&nbsp;            log.warn(&quot;Could not delete file: {}&quot;, asset.getFilePath());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        mediaAssetRepository.delete(asset);</b>
+<b class="fc">&nbsp;        log.info(&quot;Portfolio media deleted: id={}, provider={}&quot;, mediaAssetId, providerPersonId);</b>
+<b class="pc">&nbsp;    }</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-05-30 22:33</div>
+</div>
+</body>
+</html>
